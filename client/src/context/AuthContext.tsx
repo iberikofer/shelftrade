@@ -8,6 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import api from '../lib/axios';
+import { queryClient } from '../lib/queryClient';
 
 export interface User {
   id: string;
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('shelftrade_user');
     setToken(null);
     setUser(null);
+    queryClient.clear();
   }, []);
 
   const login = useCallback((newToken: string, newUser: User) => {
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('shelftrade_user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    queryClient.clear();
   }, []);
 
   const refreshUser = useCallback(async () => {

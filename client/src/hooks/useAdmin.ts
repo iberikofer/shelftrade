@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import api from '../lib/axios';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 export interface AdminUser {
@@ -17,24 +18,30 @@ export interface AdminUser {
 }
 
 export function useAdminStats() {
+  const { user, isAdmin } = useAuth();
+
   return useQuery<{
     stats: { totalUsers: number; totalBooks: number; totalRequests: number };
   }>({
-    queryKey: ['admin-stats'],
+    queryKey: ['admin-stats', user?.id],
     queryFn: async () => {
       const res = await api.get('/admin/stats');
       return res.data;
     },
+    enabled: !!isAdmin,
   });
 }
 
 export function useAdminUsers() {
+  const { user, isAdmin } = useAuth();
+
   return useQuery<{ data: AdminUser[]; total: number }>({
-    queryKey: ['admin-users'],
+    queryKey: ['admin-users', user?.id],
     queryFn: async () => {
       const res = await api.get('/admin/users');
       return res.data;
     },
+    enabled: !!isAdmin,
   });
 }
 

@@ -11,6 +11,7 @@ import { useAuth } from '../../../context/AuthContext';
 import api from '../../../lib/axios';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
+import { useRandomQuote } from '../../../lib/quotes';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
@@ -32,14 +33,23 @@ export default function RegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const quote = useRandomQuote(2);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
+
+  const fillDemo = (name: string, email: string) => {
+    setValue('name', name, { shouldValidate: true });
+    setValue('email', email, { shouldValidate: true });
+    setValue('password', 'Password123!', { shouldValidate: true });
+    setValue('confirmPassword', 'Password123!', { shouldValidate: true });
+  };
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
@@ -80,30 +90,59 @@ export default function RegisterPage() {
             </div>
 
             <blockquote className="font-serif text-xl sm:text-2xl font-normal leading-snug tracking-tight text-[#FAF7EE] italic">
-              &ldquo;A reader lives a thousand lives before he dies.&rdquo;
+              &ldquo;{quote.text}&rdquo;
             </blockquote>
             <p className="text-xs font-mono text-[#8A7F6A] mt-2 tracking-wider uppercase">
-              — George R.R. Martin
+              — {quote.author}
             </p>
 
             <div className="mt-8 pt-6 border-t border-[#8B2020]/30 space-y-2.5 text-xs text-[#EAE4CE]/85">
               <div className="flex items-center gap-2">
-                <span className="text-[#E06000] font-bold">✦</span>
-                <span>List unlimited books from your personal library</span>
+                <span className="text-[#E06000] font-bold">✓</span>
+                <span>Direct peer-to-peer book exchanges</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[#E06000] font-bold">✦</span>
-                <span>Propose trades with readers across the catalog</span>
+                <span className="text-[#E06000] font-bold">✓</span>
+                <span>Real-time email trade notifications</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[#E06000] font-bold">✦</span>
-                <span>100% community-driven book exchange</span>
+                <span className="text-[#E06000] font-bold">✓</span>
+                <span>Personal shelf &amp; catalog discovery</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#8B2020]/30 text-[11px] text-[#8A7F6A] font-mono">
-            ShelfTrade Community Archive • Open Membership
+          {/* Quick Demo Access */}
+          <div className="pt-4 border-t border-[#8B2020]/30">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[#8A7F6A] font-semibold mb-2">
+              Reader Demo Pass (1-Click Fill)
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => fillDemo('Alice Hemingway', 'alice@shelftrade.local')}
+                className="p-2 rounded-xs border border-[#8B2020]/50 bg-[#170E0B] hover:bg-[#2F1D17] text-left transition-colors cursor-pointer"
+              >
+                <div className="font-semibold text-[#FAF7EE] text-[11px]">
+                  Alice (Reader)
+                </div>
+                <div className="text-[9px] font-mono text-[#8A7F6A] truncate">
+                  alice@shelftrade.local
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => fillDemo('Admin Moderator', 'admin@shelftrade.local')}
+                className="p-2 rounded-xs border border-[#8B2020]/50 bg-[#170E0B] hover:bg-[#2F1D17] text-left transition-colors cursor-pointer"
+              >
+                <div className="font-semibold text-[#FAF7EE] text-[11px]">
+                  Admin Moderator
+                </div>
+                <div className="text-[9px] font-mono text-[#8A7F6A] truncate">
+                  admin@shelftrade.local
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 

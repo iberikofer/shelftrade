@@ -52,7 +52,7 @@ export default function BookCard({ book, onDelete, isDeleting = false }: BookCar
           />
 
           {isOwner && (
-            <div className="absolute top-2.5 right-2.5 bg-olive/90 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-xs shadow-xs z-20">
+            <div className="absolute top-2.5 right-2.5 bg-[#2B541C] text-[#FAF7EE] font-mono text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-xs border-2 border-white shadow-md ring-1 ring-black/40 z-20 select-none">
               YOUR SHELF
             </div>
           )}

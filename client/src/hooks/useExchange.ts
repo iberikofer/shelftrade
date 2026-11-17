@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import api from '../lib/axios';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 export interface ExchangeBook {
@@ -71,12 +72,15 @@ export function useRequestExchange() {
 }
 
 export function useMyExchangeRequests() {
+  const { user } = useAuth();
+
   return useQuery<MyExchangeRequestsData>({
-    queryKey: ['exchange-requests'],
+    queryKey: ['exchange-requests', user?.id],
     queryFn: async () => {
       const res = await api.get('/exchange/requests');
       return res.data;
     },
+    enabled: !!user?.id,
   });
 }
 

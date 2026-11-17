@@ -11,6 +11,7 @@ import { useAuth } from '../../../context/AuthContext';
 import api from '../../../lib/axios';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
+import { useRandomQuote } from '../../../lib/quotes';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
@@ -25,6 +26,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const quote = useRandomQuote(1);
 
   const {
     register,
@@ -74,29 +76,14 @@ export default function LoginPage() {
             </div>
 
             <blockquote className="font-serif text-xl sm:text-2xl font-normal leading-snug tracking-tight text-[#FAF7EE] italic">
-              &ldquo;Books are a uniquely portable magic.&rdquo;
+              &ldquo;{quote.text}&rdquo;
             </blockquote>
             <p className="text-xs font-mono text-[#8A7F6A] mt-2 tracking-wider uppercase">
-              — Stephen King
+              — {quote.author}
             </p>
-
-            <div className="mt-8 pt-6 border-t border-[#8B2020]/30 space-y-2.5 text-xs text-[#EAE4CE]/85">
-              <div className="flex items-center gap-2">
-                <span className="text-[#E06000] font-bold">✓</span>
-                <span>Direct peer-to-peer book exchanges</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[#E06000] font-bold">✓</span>
-                <span>Real-time email trade notifications</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[#E06000] font-bold">✓</span>
-                <span>Personal shelf &amp; catalog discovery</span>
-              </div>
-            </div>
           </div>
 
-          {/* Quick Demo Access */}
+          {/* Quick Demo Access directly under the quote's bottom hr */}
           <div className="pt-4 border-t border-[#8B2020]/30">
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#8A7F6A] font-semibold mb-2">
               Reader Demo Pass (1-Click Fill)

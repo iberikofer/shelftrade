@@ -4,15 +4,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import api from '../lib/axios';
 import { BookItem } from '../components/books/BookCard';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 export function useMyBooks() {
+  const { user } = useAuth();
+
   return useQuery<{ data: BookItem[]; total: number }>({
-    queryKey: ['my-books'],
+    queryKey: ['my-books', user?.id],
     queryFn: async () => {
       const res = await api.get('/me/books');
       return res.data;
     },
+    enabled: !!user?.id,
   });
 }
 

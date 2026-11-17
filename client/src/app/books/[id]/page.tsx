@@ -17,6 +17,7 @@ import {
   User as UserIcon,
   Mail,
   CheckCircle,
+  XCircle,
   Clock,
   ArrowLeftRight,
 } from 'lucide-react';
@@ -176,7 +177,13 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
                 <div className="flex flex-col gap-2.5 p-4 bg-card border border-card-border rounded-sm">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                      <Clock className="w-4 h-4 text-secondary" />
+                      {existingRequest.status === 'ACCEPTED' ? (
+                        <CheckCircle className="w-4 h-4 text-olive" />
+                      ) : existingRequest.status === 'REJECTED' ? (
+                        <XCircle className="w-4 h-4 text-rust" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-secondary" />
+                      )}
                       <span>Request Status</span>
                     </div>
                     <Badge
