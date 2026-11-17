@@ -32,6 +32,16 @@
   --font-serif: var(--font-crimson), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-mono), monospace;
+
+  /* Sharper, bookish editorial corner radii (less rounded) */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 5px;
+  --radius-2xl: 6px;
+  --radius-3xl: 8px;
 }
 
 html {
@@ -93,6 +103,40 @@ body {
 .focus-ring:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
+}
+
+/* Editorial Shimmer Loader for book covers */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.35) 35%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 255, 255, 0.35) 65%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.8s infinite;
+  content: '';
 }
 
 /* Reduced motion accessibility */

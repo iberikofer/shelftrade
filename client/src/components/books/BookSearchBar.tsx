@@ -20,7 +20,7 @@ export default function BookSearchBar({
   totalBooks,
 }: BookSearchBarProps) {
   return (
-    <div className="w-full bg-card border border-card-border rounded-lg p-4 mb-8 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+    <div className="w-full bg-card border border-card-border rounded-sm p-4 mb-8 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
       {/* Search Input */}
       <div className="relative flex-1">
         <Input
@@ -65,7 +65,7 @@ export default function BookSearchBar({
             id="sort-select"
             value={sort}
             onChange={e => onSortChange(e.target.value)}
-            className="bg-card text-foreground text-xs font-medium border border-card-border hover:border-card-border-hover rounded-md px-2.5 py-2 focus-ring cursor-pointer transition-colors"
+            className="bg-card text-foreground text-xs font-medium border border-card-border hover:border-card-border-hover rounded-sm px-2.5 py-2 focus-ring cursor-pointer transition-colors"
           >
             <option value="asc">Title (A → Z)</option>
             <option value="desc">Title (Z → A)</option>

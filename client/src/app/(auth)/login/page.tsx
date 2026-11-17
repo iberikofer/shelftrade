@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { BookOpen, LogIn, Key, Mail } from 'lucide-react';
+import { BookOpen, LogIn, Key, Mail, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import api from '../../../lib/axios';
 import Input from '../../../components/ui/Input';
@@ -58,85 +58,136 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] py-6 animate-fadeIn">
-      <div className="w-full max-w-md bg-card border border-card-border rounded-lg shadow-sm p-8">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex w-12 h-12 rounded-lg bg-primary/10 text-primary items-center justify-center mb-3">
-            <BookOpen className="w-6 h-6" />
+    <div className="flex items-center justify-center min-h-[75vh] py-8 animate-fadeIn">
+      <div className="w-full max-w-4xl bg-card border border-card-border rounded-sm shadow-sm overflow-hidden grid grid-cols-1 md:grid-cols-12">
+        {/* Left Column: Editorial Bookplate & Reader Ledger */}
+        <div className="md:col-span-5 bg-[#201511] text-[#F5F0D0] p-8 sm:p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#8B2020]/30 relative">
+          <div>
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#E06000] font-semibold">
+              Ex Libris // ShelfTrade
+            </span>
           </div>
-          <h1 className="font-serif text-2xl font-bold text-foreground">
-            Sign in to ShelfTrade
-          </h1>
-          <p className="text-xs text-muted mt-1.5">
-            Access your personal shelf and exchange requests
-          </p>
+
+          <div className="my-auto py-6 sm:py-8">
+            <div className="w-10 h-10 rounded-sm bg-[#8B2020]/25 text-[#E06000] flex items-center justify-center mb-5 border border-[#8B2020]/40">
+              <BookOpen className="w-5 h-5" />
+            </div>
+
+            <blockquote className="font-serif text-xl sm:text-2xl font-normal leading-snug tracking-tight text-[#FAF7EE] italic">
+              &ldquo;Books are a uniquely portable magic.&rdquo;
+            </blockquote>
+            <p className="text-xs font-mono text-[#8A7F6A] mt-2 tracking-wider uppercase">
+              — Stephen King
+            </p>
+
+            <div className="mt-8 pt-6 border-t border-[#8B2020]/30 space-y-2.5 text-xs text-[#EAE4CE]/85">
+              <div className="flex items-center gap-2">
+                <span className="text-[#E06000] font-bold">✓</span>
+                <span>Direct peer-to-peer book exchanges</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[#E06000] font-bold">✓</span>
+                <span>Real-time email trade notifications</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[#E06000] font-bold">✓</span>
+                <span>Personal shelf &amp; catalog discovery</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Demo Access */}
+          <div className="pt-4 border-t border-[#8B2020]/30">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[#8A7F6A] font-semibold mb-2">
+              Reader Demo Pass (1-Click Fill)
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => fillDemo('alice@shelftrade.local')}
+                className="p-2 rounded-xs border border-[#8B2020]/50 bg-[#170E0B] hover:bg-[#2F1D17] text-left transition-colors cursor-pointer"
+              >
+                <div className="font-semibold text-[#FAF7EE] text-[11px]">
+                  Alice (Reader)
+                </div>
+                <div className="text-[9px] font-mono text-[#8A7F6A] truncate">
+                  alice@shelftrade.local
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => fillDemo('admin@shelftrade.local')}
+                className="p-2 rounded-xs border border-[#8B2020]/50 bg-[#170E0B] hover:bg-[#2F1D17] text-left transition-colors cursor-pointer"
+              >
+                <div className="font-semibold text-[#FAF7EE] text-[11px]">
+                  Admin Moderator
+                </div>
+                <div className="text-[9px] font-mono text-[#8A7F6A] truncate">
+                  admin@shelftrade.local
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <Input
-            label="Email Address"
-            type="email"
-            placeholder="reader@example.com"
-            leftIcon={<Mail className="w-4 h-4" />}
-            error={errors.email?.message}
-            {...register('email')}
-          />
+        {/* Right Column: Authentication Form */}
+        <div className="md:col-span-7 bg-card p-8 sm:p-10 md:p-12 flex flex-col justify-center">
+          <div className="mb-6">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted font-semibold">
+              Chapter I // Reader Sign-in
+            </span>
+            <h1 className="font-serif text-3xl font-bold text-foreground mt-1 tracking-tight">
+              Sign In to Your Shelf
+            </h1>
+            <p className="text-xs text-muted mt-1.5 leading-relaxed">
+              Enter your credentials to manage your listed inventory, review incoming swap
+              proposals, and discover new books.
+            </p>
+          </div>
 
-          <Input
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            leftIcon={<Key className="w-4 h-4" />}
-            error={errors.password?.message}
-            {...register('password')}
-          />
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <Input
+              label="Email Address"
+              type="email"
+              placeholder="reader@example.com"
+              leftIcon={<Mail className="w-4 h-4" />}
+              error={errors.email?.message}
+              {...register('email')}
+            />
 
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            isLoading={isLoading}
-            className="w-full mt-2"
-            leftIcon={<LogIn className="w-4 h-4" />}
-          >
-            Sign In
-          </Button>
-        </form>
+            <Input
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              leftIcon={<Key className="w-4 h-4" />}
+              error={errors.password?.message}
+              {...register('password')}
+            />
 
-        {/* Demo Accounts Quick-Fill Box */}
-        <div className="mt-6 pt-5 border-t border-card-border">
-          <p className="text-[11px] font-mono uppercase tracking-wider text-muted font-semibold mb-2 text-center">
-            Quick Demo Accounts (1-Click Fill)
-          </p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              type="button"
-              onClick={() => fillDemo('alice@shelftrade.local')}
-              className="p-2 rounded border border-card-border hover:bg-background/80 text-left transition-colors cursor-pointer"
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              isLoading={isLoading}
+              className="w-full mt-2"
+              leftIcon={<LogIn className="w-4 h-4" />}
             >
-              <div className="font-semibold text-foreground">Alice (Reader)</div>
-              <div className="text-[10px] text-muted">alice@shelftrade.local</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemo('admin@shelftrade.local')}
-              className="p-2 rounded border border-card-border hover:bg-background/80 text-left transition-colors cursor-pointer"
+              Sign In
+            </Button>
+          </form>
+
+          {/* Switch Link */}
+          <div className="mt-8 pt-5 border-t border-card-border flex items-center justify-between text-xs text-muted">
+            <span>New to the community?</span>
+            <Link
+              href="/register"
+              className="font-semibold text-primary hover:underline inline-flex items-center gap-1 transition-colors"
             >
-              <div className="font-semibold text-foreground">Admin Moderator</div>
-              <div className="text-[10px] text-muted">admin@shelftrade.local</div>
-            </button>
+              <span>Join ShelfTrade</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
-
-        {/* Footer Link */}
-        <p className="text-center text-xs text-muted mt-6">
-          Do not have an account yet?{' '}
-          <Link href="/register" className="text-primary hover:underline font-semibold">
-            Create an account
-          </Link>
-        </p>
       </div>
     </div>
   );

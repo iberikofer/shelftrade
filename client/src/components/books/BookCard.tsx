@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Book as BookIcon, Trash2, ArrowRight } from 'lucide-react';
+import { Trash2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmModal from '../ui/ConfirmModal';
+import BookCover from './BookCover';
 
 export interface BookItem {
   id: string;
@@ -29,48 +30,29 @@ interface BookCardProps {
 
 export default function BookCard({ book, onDelete, isDeleting = false }: BookCardProps) {
   const { user, isAdmin } = useAuth();
-  const [imageError, setImageError] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const isOwner = user?.id === book.ownerId;
   const canDelete = (isOwner || isAdmin) && !!onDelete;
 
-  // Resolve image source (handles uploaded local files and external urls)
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
-  const coverSrc = book.photoUrl
-    ? book.photoUrl.startsWith('http')
-      ? book.photoUrl
-      : `${serverUrl}${book.photoUrl}`
-    : null;
-
   return (
     <>
-      <div className="group bg-card border border-card-border rounded-lg overflow-hidden flex flex-col card-tactile shadow-xs">
-        {/* Cover Photo */}
+      <div className="group bg-card border border-card-border rounded-sm overflow-hidden flex flex-col card-tactile shadow-xs">
+        {/* Cover Photo with Skeleton Loader */}
         <Link
           href={`/books/${book.id}`}
-          className="relative w-full aspect-[3/4] bg-background block overflow-hidden"
+          className="relative w-full block overflow-hidden"
         >
-          {coverSrc && !imageError ? (
-            <img
-              src={coverSrc}
-              alt={book.title}
-              onError={() => setImageError(true)}
-              className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-card-border/40 text-muted">
-              <BookIcon className="w-10 h-10 mb-2 opacity-50 text-primary" />
-              <span className="font-serif font-bold text-xs text-foreground line-clamp-2 px-2">
-                {book.title}
-              </span>
-              <span className="text-[11px] text-muted mt-1">{book.author}</span>
-            </div>
-          )}
+          <BookCover
+            src={book.photoUrl}
+            title={book.title}
+            author={book.author}
+            size="md"
+            hoverZoom
+          />
 
           {isOwner && (
-            <div className="absolute top-2.5 right-2.5 bg-olive/90 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
+            <div className="absolute top-2.5 right-2.5 bg-olive/90 text-white font-mono text-[10px] font-bold px-2 py-0.5 rounded-xs shadow-xs z-20">
               YOUR SHELF
             </div>
           )}
@@ -125,10 +107,10 @@ export default function BookCard({ book, onDelete, isDeleting = false }: BookCar
 
               <Link
                 href={`/books/${book.id}`}
-                className="inline-flex items-center gap-0.5 text-xs font-semibold text-primary hover:text-primary-hover transition-colors ml-1"
+                className="group/details inline-flex items-center gap-0.5 text-xs font-semibold text-primary hover:text-primary-hover transition-colors ml-1 cursor-pointer"
               >
                 <span>Details</span>
-                <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="w-3 h-3 transition-transform duration-150 group-hover/details:translate-x-1" />
               </Link>
             </div>
           </div>

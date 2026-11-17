@@ -26,7 +26,7 @@ export default function Navbar() {
           href="/books"
           className="flex items-center gap-2.5 font-serif text-xl font-bold text-primary tracking-tight hover:opacity-90 transition-opacity"
         >
-          <div className="w-8 h-8 rounded-md bg-primary text-white flex items-center justify-center shadow-xs">
+          <div className="w-8 h-8 rounded-sm bg-primary text-white flex items-center justify-center shadow-xs">
             <BookOpen className="w-4 h-4" />
           </div>
           <span className="text-foreground">
@@ -45,7 +45,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`
-                  px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus-ring
+                  px-3 py-1.5 rounded-sm text-sm font-medium transition-colors focus-ring
                   ${
                     isActive
                       ? 'bg-primary/10 text-primary font-semibold'

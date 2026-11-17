@@ -48,7 +48,7 @@ export default function Pagination({
               onClick={() => onPageChange(p)}
               aria-current={isActive ? 'page' : undefined}
               className={`
-                w-8 h-8 rounded-md text-xs font-medium font-mono transition-colors focus-ring cursor-pointer
+                w-8 h-8 rounded-sm text-xs font-medium font-mono transition-colors focus-ring cursor-pointer
                 ${
                   isActive
                     ? 'bg-primary text-white border border-primary font-bold shadow-xs'

@@ -108,8 +108,8 @@ export default function AdminPage() {
 
         {/* Stats Metrics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-card border border-card-border rounded-lg p-5 flex items-center gap-4 shadow-xs">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+          <div className="bg-card border border-card-border rounded-sm p-5 flex items-center gap-4 shadow-xs">
+            <div className="w-12 h-12 rounded-sm bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <Users className="w-6 h-6" />
             </div>
             <div>
@@ -126,8 +126,8 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="bg-card border border-card-border rounded-lg p-5 flex items-center gap-4 shadow-xs">
-            <div className="w-12 h-12 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+          <div className="bg-card border border-card-border rounded-sm p-5 flex items-center gap-4 shadow-xs">
+            <div className="w-12 h-12 rounded-sm bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
               <BookOpen className="w-6 h-6" />
             </div>
             <div>
@@ -144,8 +144,8 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="bg-card border border-card-border rounded-lg p-5 flex items-center gap-4 shadow-xs">
-            <div className="w-12 h-12 rounded-lg bg-olive/10 text-olive flex items-center justify-center shrink-0">
+          <div className="bg-card border border-card-border rounded-sm p-5 flex items-center gap-4 shadow-xs">
+            <div className="w-12 h-12 rounded-sm bg-olive/10 text-olive flex items-center justify-center shrink-0">
               <ArrowLeftRight className="w-6 h-6" />
             </div>
             <div>
@@ -164,7 +164,7 @@ export default function AdminPage() {
         </div>
 
         {/* Users Management Table */}
-        <div className="bg-card border border-card-border rounded-lg overflow-hidden shadow-xs">
+        <div className="bg-card border border-card-border rounded-sm overflow-hidden shadow-xs">
           <div className="p-5 border-b border-card-border flex items-center justify-between">
             <h2 className="font-serif text-lg font-bold text-foreground">
               Registered Users ({usersData?.total || 0})
@@ -268,10 +268,10 @@ export default function AdminPage() {
         {/* Modal: Create User */}
         {showAddUserModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-fadeIn">
-            <div className="relative w-full max-w-md bg-card border border-card-border rounded-lg shadow-xl p-6">
+            <div className="relative w-full max-w-md bg-card border border-card-border rounded-sm shadow-xl p-6">
               <button
                 onClick={() => setShowAddUserModal(false)}
-                className="absolute top-4 right-4 text-muted hover:text-foreground focus-ring rounded-md p-1 cursor-pointer"
+                className="absolute top-4 right-4 text-muted hover:text-foreground focus-ring rounded-sm p-1 cursor-pointer"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />

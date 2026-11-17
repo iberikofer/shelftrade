@@ -23,7 +23,7 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    'relative inline-flex items-center justify-center font-medium rounded-md btn-tactile focus-ring cursor-pointer select-none';
+    'relative inline-flex items-center justify-center font-medium rounded-sm btn-tactile focus-ring cursor-pointer select-none';
 
   const sizeStyles = {
     sm: 'text-xs px-3 py-1.5 gap-1.5',

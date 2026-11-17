@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function BookSkeleton() {
   return (
-    <div className="bg-card border border-card-border rounded-lg overflow-hidden flex flex-col animate-pulse shadow-xs">
+    <div className="bg-card border border-card-border rounded-sm overflow-hidden flex flex-col animate-pulse shadow-xs">
       {/* Cover Skeleton with fixed 3:4 aspect ratio */}
       <div className="w-full aspect-[3/4] bg-muted/20" />
 

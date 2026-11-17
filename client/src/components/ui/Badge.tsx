@@ -29,7 +29,7 @@ export default function Badge({
   return (
     <span
       className={`
-        inline-flex items-center font-mono uppercase tracking-wider font-semibold rounded-md border
+        inline-flex items-center font-mono uppercase tracking-wider font-semibold rounded-xs border
         ${variantStyles}
         ${sizeStyles}
         ${className}

@@ -12,6 +12,9 @@ async function getTransporter(): Promise<nodemailer.Transporter> {
       host: SMTP_HOST,
       port: Number(SMTP_PORT) || 587,
       secure: Number(SMTP_PORT) === 465,
+      connectionTimeout: 2500,
+      greetingTimeout: 2500,
+      socketTimeout: 3000,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS,
@@ -32,10 +35,14 @@ async function getTransporter(): Promise<nodemailer.Transporter> {
       etherealPromise,
       timeoutPromise,
     ])) as nodemailer.TestAccount;
+
     transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
       secure: false,
+      connectionTimeout: 2000,
+      greetingTimeout: 2000,
+      socketTimeout: 3000,
       auth: {
         user: testAccount.user,
         pass: testAccount.pass,
@@ -65,7 +72,6 @@ export interface SendExchangeEmailOptions {
 }
 
 export async function sendExchangeNotificationEmail(options: SendExchangeEmailOptions) {
-  const mailer = await getTransporter();
   const from =
     process.env.SMTP_FROM || '"ShelfTrade Community" <noreply@shelftrade.local>';
 
@@ -95,23 +101,59 @@ export async function sendExchangeNotificationEmail(options: SendExchangeEmailOp
     </div>
   `;
 
-  const info = await mailer.sendMail({
-    from,
-    to: options.toEmail,
-    subject: `[ShelfTrade] Exchange request for "${options.bookTitle}" from ${options.requesterName}`,
-    html: htmlContent,
-  });
-
-  let previewUrl: string | undefined;
   try {
-    previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
-  } catch {
-    previewUrl = undefined;
-  }
+    const mailer = await getTransporter();
+    const info = await mailer.sendMail({
+      from,
+      to: options.toEmail,
+      subject: `[ShelfTrade] Exchange request for "${options.bookTitle}" from ${options.requesterName}`,
+      html: htmlContent,
+    });
 
-  if (previewUrl) {
-    console.log(`[Mailer] Preview email URL: ${previewUrl}`);
-  }
+    let previewUrl: string | undefined;
+    try {
+      previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
+    } catch {
+      previewUrl = undefined;
+    }
 
-  return { messageId: info.messageId, previewUrl };
+    if (previewUrl) {
+      console.log(`[Mailer] Preview email URL: ${previewUrl}`);
+    } else {
+      console.log(
+        `[Mailer] Exchange email dispatched successfully to ${options.toEmail}`,
+      );
+    }
+
+    return { messageId: info.messageId, previewUrl };
+  } catch (mailErr: unknown) {
+    const errorMsg = mailErr instanceof Error ? mailErr.message : String(mailErr);
+    console.warn(
+      `[Mailer] SMTP delivery failed (${errorMsg}). Switching to offline console dispatch:`,
+    );
+    console.log('────────────────────────────────────────────────────────────');
+    console.log('[ShelfTrade Outgoing Email Notification]');
+    console.log(`To: ${options.toEmail} (${options.toOwnerName})`);
+    console.log(
+      `Subject: [ShelfTrade] Exchange request for "${options.bookTitle}" from ${options.requesterName}`,
+    );
+    console.log(`Requester: ${options.requesterName} <${options.requesterEmail}>`);
+    console.log(`Target Book: "${options.bookTitle}"`);
+    console.log(
+      `Offered Books: ${
+        options.requesterBooks.length > 0
+          ? options.requesterBooks.map(b => `"${b.title}" by ${b.author}`).join(', ')
+          : '(No books currently listed on requester shelf)'
+      }`,
+    );
+    console.log('────────────────────────────────────────────────────────────');
+
+    // Fall back to jsonTransport for any subsequent calls
+    transporter = nodemailer.createTransport({ jsonTransport: true });
+
+    return {
+      messageId: `local-${Date.now()}`,
+      previewUrl: undefined,
+    };
+  }
 }

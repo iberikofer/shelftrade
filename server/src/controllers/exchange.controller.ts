@@ -129,7 +129,20 @@ export const getMyRequests = async (
       },
       include: {
         fromUser: {
-          select: { id: true, name: true, email: true, avatarUrl: true },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatarUrl: true,
+            books: {
+              select: {
+                id: true,
+                title: true,
+                author: true,
+                photoUrl: true,
+              },
+            },
+          },
         },
         toBook: {
           select: { id: true, title: true, author: true, photoUrl: true },

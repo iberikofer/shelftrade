@@ -49,7 +49,7 @@ export default function ConfirmModal({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-fadeIn">
       <div
-        className="relative w-full max-w-md bg-card border border-card-border rounded-lg shadow-xl p-6 overflow-hidden transform transition-all duration-200"
+        className="relative w-full max-w-md bg-card border border-card-border rounded-sm shadow-xl p-6 overflow-hidden transform transition-all duration-200"
         role="dialog"
         aria-modal="true"
       >

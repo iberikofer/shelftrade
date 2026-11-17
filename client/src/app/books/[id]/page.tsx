@@ -4,11 +4,12 @@ import React, { use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useBook } from '../../../hooks/useBooks';
-import { useRequestExchange } from '../../../hooks/useExchange';
+import { useRequestExchange, useMyExchangeRequests } from '../../../hooks/useExchange';
 import { useAuth } from '../../../context/AuthContext';
 import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import Spinner from '../../../components/ui/Spinner';
+import BookCover from '../../../components/books/BookCover';
 import {
   ArrowLeft,
   Book as BookIcon,
@@ -16,6 +17,8 @@ import {
   User as UserIcon,
   Mail,
   CheckCircle,
+  Clock,
+  ArrowLeftRight,
 } from 'lucide-react';
 
 interface BookDetailsPageProps {
@@ -28,17 +31,14 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
   const { user, isAuthenticated } = useAuth();
 
   const { data, isLoading, error } = useBook(resolvedParams.id);
+  const { data: myExchangeData } = useMyExchangeRequests();
   const requestExchangeMutation = useRequestExchange();
 
   const book = data?.data;
   const isOwner = user?.id === book?.ownerId;
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
-  const coverSrc = book?.photoUrl
-    ? book.photoUrl.startsWith('http')
-      ? book.photoUrl
-      : `${serverUrl}${book.photoUrl}`
-    : null;
+  // Check if current user already sent an exchange request for this book
+  const existingRequest = myExchangeData?.sent?.find(r => r.toBookId === book?.id);
 
   const handleRequestExchange = () => {
     if (!isAuthenticated) {
@@ -92,19 +92,15 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-        {/* Book Cover (5 cols) */}
-        <div className="md:col-span-5 bg-card border border-card-border rounded-lg overflow-hidden shadow-sm aspect-[3/4] relative">
-          {coverSrc ? (
-            <img src={coverSrc} alt={book.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-card-border/30 text-muted">
-              <BookIcon className="w-16 h-16 mb-3 text-primary opacity-40" />
-              <span className="font-serif text-lg font-bold text-foreground line-clamp-3">
-                {book.title}
-              </span>
-              <span className="text-sm text-muted mt-1">{book.author}</span>
-            </div>
-          )}
+        {/* Book Cover (5 cols) with Skeleton Loader */}
+        <div className="md:col-span-5 bg-card border border-card-border rounded-sm overflow-hidden shadow-sm">
+          <BookCover
+            src={book.photoUrl}
+            title={book.title}
+            author={book.author}
+            size="lg"
+            priority
+          />
         </div>
 
         {/* Book Information & Action (7 cols) */}
@@ -127,7 +123,7 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
             <p className="text-lg text-muted font-medium mt-1">by {book.author}</p>
           </div>
 
-          <div className="p-4 bg-card border border-card-border rounded-lg flex flex-col gap-3">
+          <div className="p-4 bg-card border border-card-border rounded-sm flex flex-col gap-3">
             <span className="text-xs font-mono uppercase tracking-wider text-muted font-semibold">
               Book Owner
             </span>
@@ -158,7 +154,7 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
           </div>
 
           {/* Exchange Action Card */}
-          <div className="p-5 bg-background/60 border border-card-border rounded-lg flex flex-col gap-3">
+          <div className="p-5 bg-background/60 border border-card-border rounded-sm flex flex-col gap-3">
             <h3 className="font-serif font-bold text-base text-foreground">
               Interested in this book?
             </h3>
@@ -170,11 +166,51 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
 
             <div className="mt-2">
               {isOwner ? (
-                <div className="flex items-center gap-2 p-3 bg-olive/10 border border-olive/20 rounded-md text-olive text-xs font-medium">
+                <div className="flex items-center gap-2 p-3 bg-olive/10 border border-olive/20 rounded-sm text-olive text-xs font-medium">
                   <CheckCircle className="w-4 h-4 shrink-0" />
                   <span>
                     You own this book. You cannot send exchange requests to yourself.
                   </span>
+                </div>
+              ) : existingRequest ? (
+                <div className="flex flex-col gap-2.5 p-4 bg-card border border-card-border rounded-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                      <Clock className="w-4 h-4 text-secondary" />
+                      <span>Request Status</span>
+                    </div>
+                    <Badge
+                      variant={
+                        existingRequest.status === 'ACCEPTED'
+                          ? 'olive'
+                          : existingRequest.status === 'REJECTED'
+                            ? 'rust'
+                            : 'secondary'
+                      }
+                      size="sm"
+                    >
+                      {existingRequest.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted leading-relaxed">
+                    {existingRequest.status === 'PENDING' &&
+                      `You requested to exchange for this book on ${new Date(existingRequest.createdAt).toLocaleDateString()}. An email notification was sent to ${book.owner?.name}.`}
+                    {existingRequest.status === 'ACCEPTED' &&
+                      `Great news! ${book.owner?.name} accepted your trade request. Coordinate exchange details directly via email.`}
+                    {existingRequest.status === 'REJECTED' &&
+                      `The owner has declined this exchange request.`}
+                  </p>
+                  <div className="pt-1">
+                    <Link href="/me/books">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<ArrowLeftRight className="w-3.5 h-3.5" />}
+                      >
+                        Manage in Exchange Requests
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <Button

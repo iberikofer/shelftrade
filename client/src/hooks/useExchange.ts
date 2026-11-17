@@ -5,6 +5,46 @@ import axios from 'axios';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 
+export interface ExchangeBook {
+  id: string;
+  title: string;
+  author: string;
+  photoUrl?: string | null;
+  owner?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export interface ExchangeRequester {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+  books?: Array<{
+    id: string;
+    title: string;
+    author: string;
+    photoUrl?: string | null;
+  }>;
+}
+
+export interface ExchangeRequestItem {
+  id: string;
+  fromUserId: string;
+  toBookId: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  createdAt: string;
+  toBook: ExchangeBook;
+  fromUser?: ExchangeRequester;
+}
+
+export interface MyExchangeRequestsData {
+  sent: ExchangeRequestItem[];
+  received: ExchangeRequestItem[];
+}
+
 export function useRequestExchange() {
   const queryClient = useQueryClient();
 
@@ -31,7 +71,7 @@ export function useRequestExchange() {
 }
 
 export function useMyExchangeRequests() {
-  return useQuery({
+  return useQuery<MyExchangeRequestsData>({
     queryKey: ['exchange-requests'],
     queryFn: async () => {
       const res = await api.get('/exchange/requests');
