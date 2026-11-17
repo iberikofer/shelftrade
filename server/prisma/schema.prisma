@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ExchangeStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id           String            @id @default(cuid())
+  name         String
+  email        String            @unique
+  passwordHash String
+  role         Role              @default(USER)
+  avatarUrl    String?
+  books        Book[]            @relation("UserBooks")
+  requestsSent ExchangeRequest[] @relation("SentRequests")
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@map("users")
+}
+
+model Book {
+  id               String            @id @default(cuid())
+  title            String
+  author           String
+  photoUrl         String?
+  ownerId          String
+  owner            User              @relation("UserBooks", fields: [ownerId], references: [id], onDelete: Cascade)
+  exchangeRequests ExchangeRequest[] @relation("BookExchangeRequests")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([title])
+  @@index([author])
+  @@map("books")
+}
+
+model ExchangeRequest {
+  id         String         @id @default(cuid())
+  fromUserId String
+  fromUser   User           @relation("SentRequests", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toBookId   String
+  toBook     Book           @relation("BookExchangeRequests", fields: [toBookId], references: [id], onDelete: Cascade)
+  status     ExchangeStatus @default(PENDING)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@map("exchange_requests")
+}
+

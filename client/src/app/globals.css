@@ -1,0 +1,100 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #F5F0D0; /* Warm cream */
+  --foreground: #1A1A1A; /* Charcoal */
+  --primary: #8B2020;    /* Crimson */
+  --primary-hover: #701A1A;
+  --secondary: #E06000;  /* Amber */
+  --secondary-hover: #C55300;
+  --accent-rust: #C0392B;/* Rust */
+  --accent-olive: #3D5C2A;/* Olive */
+  --card: #FFFFFF;
+  --card-border: rgba(26, 26, 26, 0.08); /* 1px hairline border */
+  --card-border-hover: rgba(26, 26, 26, 0.18);
+  --muted: #8A7F6A;      /* Editorial muted */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-rust: var(--accent-rust);
+  --color-olive: var(--accent-olive);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-card-border-hover: var(--card-border-hover);
+  --color-muted: var(--muted);
+  --font-serif: var(--font-crimson), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), monospace;
+}
+
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hairline border utility */
+.border-hairline {
+  border: 1px solid var(--card-border);
+}
+
+.border-hairline-hover:hover {
+  border-color: var(--card-border-hover);
+}
+
+/* Tactile button micro-interactions */
+.btn-tactile {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-tactile:hover {
+  transform: translateY(-1px);
+}
+
+.btn-tactile:active {
+  transform: scale(0.97) translateY(0px);
+}
+
+/* Card hover lift */
+.card-tactile {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+}
+
+.card-tactile:hover {
+  transform: translateY(-2px);
+  border-color: var(--card-border-hover);
+}
+
+/* Accessible focus ring */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
