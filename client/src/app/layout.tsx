@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter, Crimson_Pro } from 'next/font/google';
 import './globals.css';
+import Providers from '../components/Providers';
+import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -27,7 +30,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${crimson.variable}`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
-        {children}
+        <Providers>
+          <Navbar />
+          <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
