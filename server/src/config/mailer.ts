@@ -18,9 +18,17 @@ async function getTransporter(): Promise<nodemailer.Transporter> {
       },
     });
     console.log('[Mailer] Using custom SMTP server');
-  } else {
-    // Generate Ethereal test SMTP account automatically
-    const testAccount = await nodemailer.createTestAccount();
+    return transporter;
+  }
+
+  // Development fallback: check if Ethereal is reachable with a 2-second timeout
+  try {
+    const etherealPromise = nodemailer.createTestAccount();
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Ethereal connection timeout')), 2000)
+    );
+
+    const testAccount = (await Promise.race([etherealPromise, timeoutPromise])) as nodemailer.TestAccount;
     transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
@@ -30,7 +38,13 @@ async function getTransporter(): Promise<nodemailer.Transporter> {
         pass: testAccount.pass,
       },
     });
-    console.log(`[Mailer] Ethereal test mailbox created for: ${testAccount.user}`);
+    console.log(`[Mailer] Ethereal test mailbox created: ${testAccount.user}`);
+  } catch (_err) {
+    // Zero-network fallback for robust offline development / testing
+    console.log('[Mailer] Offline/Local JSON transporter active (emails logged to terminal)');
+    transporter = nodemailer.createTransport({
+      jsonTransport: true,
+    });
   }
 
   return transporter;
@@ -81,11 +95,16 @@ export async function sendExchangeNotificationEmail(options: SendExchangeEmailOp
     html: htmlContent,
   });
 
-  const previewUrl = nodemailer.getTestMessageUrl(info);
+  let previewUrl: string | undefined;
+  try {
+    previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
+  } catch {
+    previewUrl = undefined;
+  }
+
   if (previewUrl) {
     console.log(`[Mailer] Preview email URL: ${previewUrl}`);
   }
 
   return { messageId: info.messageId, previewUrl };
 }
-
