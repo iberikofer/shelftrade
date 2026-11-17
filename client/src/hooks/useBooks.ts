@@ -54,4 +54,3 @@ export function useBook(id?: string) {
     enabled: !!id,
   });
 }
-

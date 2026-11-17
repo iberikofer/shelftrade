@@ -49,7 +49,7 @@ export default function MyBooksPage() {
         onSuccess: () => {
           reset();
           setSelectedFile(null);
-          setFileKey((k) => k + 1);
+          setFileKey(k => k + 1);
         },
       });
     } else {
@@ -63,7 +63,7 @@ export default function MyBooksPage() {
           onSuccess: () => {
             reset();
           },
-        }
+        },
       );
     }
   };
@@ -84,7 +84,8 @@ export default function MyBooksPage() {
             My Books
           </h1>
           <p className="text-sm text-muted mt-1.5 max-w-lg">
-            Manage your personal library. Books listed here are visible to other readers for trade requests.
+            Manage your personal library. Books listed here are visible to other readers
+            for trade requests.
           </p>
         </div>
 
@@ -92,7 +93,9 @@ export default function MyBooksPage() {
         <div className="bg-card border border-card-border rounded-lg p-6 shadow-xs">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-card-border">
             <Plus className="w-5 h-5 text-primary" />
-            <h2 className="font-serif text-lg font-bold text-foreground">Add a Book to Your Shelf</h2>
+            <h2 className="font-serif text-lg font-bold text-foreground">
+              Add a Book to Your Shelf
+            </h2>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -157,11 +160,13 @@ export default function MyBooksPage() {
                     key={fileKey}
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    onChange={e => setSelectedFile(e.target.files?.[0] || null)}
                     className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
                   />
                   {selectedFile && (
-                    <span className="text-xs text-muted truncate max-w-xs">{selectedFile.name}</span>
+                    <span className="text-xs text-muted truncate max-w-xs">
+                      {selectedFile.name}
+                    </span>
                   )}
                 </div>
               )}
@@ -197,7 +202,7 @@ export default function MyBooksPage() {
             </div>
           ) : data?.data && data.data.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {data.data.map((book) => (
+              {data.data.map(book => (
                 <BookCard
                   key={book.id}
                   book={book}

@@ -66,7 +66,11 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
           This book may have been removed by its owner or the link is invalid.
         </p>
         <Link href="/books" className="inline-block mt-6">
-          <Button variant="outline" size="sm" leftIcon={<ArrowLeft className="w-4 h-4" />}>
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={<ArrowLeft className="w-4 h-4" />}
+          >
             Back to Catalog
           </Button>
         </Link>
@@ -91,11 +95,7 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
         {/* Book Cover (5 cols) */}
         <div className="md:col-span-5 bg-card border border-card-border rounded-lg overflow-hidden shadow-sm aspect-[3/4] relative">
           {coverSrc ? (
-            <img
-              src={coverSrc}
-              alt={book.title}
-              className="w-full h-full object-cover"
-            />
+            <img src={coverSrc} alt={book.title} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-card-border/30 text-muted">
               <BookIcon className="w-16 h-16 mb-3 text-primary opacity-40" />
@@ -146,7 +146,9 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
               )}
 
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-foreground">{book.owner?.name}</span>
+                <span className="text-sm font-bold text-foreground">
+                  {book.owner?.name}
+                </span>
                 <span className="text-xs text-muted flex items-center gap-1">
                   <Mail className="w-3 h-3 text-muted" />
                   {book.owner?.email}
@@ -157,16 +159,22 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
 
           {/* Exchange Action Card */}
           <div className="p-5 bg-background/60 border border-card-border rounded-lg flex flex-col gap-3">
-            <h3 className="font-serif font-bold text-base text-foreground">Interested in this book?</h3>
+            <h3 className="font-serif font-bold text-base text-foreground">
+              Interested in this book?
+            </h3>
             <p className="text-xs text-muted leading-relaxed">
-              Clicking <strong>&ldquo;Request Exchange&rdquo;</strong> will send an email notification to the owner with your contact details and the books currently available on your shelf.
+              Clicking <strong>&ldquo;Request Exchange&rdquo;</strong> will send an email
+              notification to the owner with your contact details and the books currently
+              available on your shelf.
             </p>
 
             <div className="mt-2">
               {isOwner ? (
                 <div className="flex items-center gap-2 p-3 bg-olive/10 border border-olive/20 rounded-md text-olive text-xs font-medium">
                   <CheckCircle className="w-4 h-4 shrink-0" />
-                  <span>You own this book. You cannot send exchange requests to yourself.</span>
+                  <span>
+                    You own this book. You cannot send exchange requests to yourself.
+                  </span>
                 </div>
               ) : (
                 <Button

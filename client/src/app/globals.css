@@ -1,18 +1,18 @@
 @import 'tailwindcss';
 
 :root {
-  --background: #F5F0D0; /* Warm cream */
-  --foreground: #1A1A1A; /* Charcoal */
-  --primary: #8B2020;    /* Crimson */
-  --primary-hover: #701A1A;
-  --secondary: #E06000;  /* Amber */
-  --secondary-hover: #C55300;
-  --accent-rust: #C0392B;/* Rust */
-  --accent-olive: #3D5C2A;/* Olive */
-  --card: #FFFFFF;
+  --background: #f5f0d0; /* Warm cream */
+  --foreground: #1a1a1a; /* Charcoal */
+  --primary: #8b2020; /* Crimson */
+  --primary-hover: #701a1a;
+  --secondary: #e06000; /* Amber */
+  --secondary-hover: #c55300;
+  --accent-rust: #c0392b; /* Rust */
+  --accent-olive: #3d5c2a; /* Olive */
+  --card: #ffffff;
   --card-border: rgba(26, 26, 26, 0.08); /* 1px hairline border */
   --card-border-hover: rgba(26, 26, 26, 0.18);
-  --muted: #8A7F6A;      /* Editorial muted */
+  --muted: #8a7f6a; /* Editorial muted */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -58,7 +58,11 @@ body {
 
 /* Tactile button micro-interactions */
 .btn-tactile {
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .btn-tactile:hover {
@@ -71,7 +75,10 @@ body {
 
 /* Card hover lift */
 .card-tactile {
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+  transition:
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.22s ease;
 }
 
 .card-tactile:hover {
@@ -90,11 +97,12 @@ body {
 
 /* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+  *,
+  ::before,
+  ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }
-

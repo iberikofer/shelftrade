@@ -153,4 +153,3 @@ export default function BookCard({ book, onDelete, isDeleting = false }: BookCar
     </>
   );
 }
-

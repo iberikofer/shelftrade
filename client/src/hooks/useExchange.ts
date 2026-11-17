@@ -13,7 +13,7 @@ export function useRequestExchange() {
       const res = await api.post(`/exchange/request/${bookId}`);
       return res.data;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast.success('Exchange request sent! The owner was notified via email.');
       queryClient.invalidateQueries({ queryKey: ['exchange-requests'] });
       queryClient.invalidateQueries({ queryKey: ['book'] });
@@ -44,7 +44,13 @@ export function useUpdateRequestStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: 'ACCEPTED' | 'REJECTED' }) => {
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: 'ACCEPTED' | 'REJECTED';
+    }) => {
       const res = await api.patch(`/exchange/requests/${id}`, { status });
       return res.data;
     },

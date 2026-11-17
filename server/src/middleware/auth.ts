@@ -6,7 +6,9 @@ export const requireAuth = (req: Request, _res: Response, next: NextFunction): v
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return next(new AppError('Authentication required. Missing or malformed token.', 401));
+    return next(
+      new AppError('Authentication required. Missing or malformed token.', 401),
+    );
   }
 
   const token = authHeader.split(' ')[1];
@@ -19,4 +21,3 @@ export const requireAuth = (req: Request, _res: Response, next: NextFunction): v
     next(new AppError('Invalid or expired authentication token.', 401, error));
   }
 };
-

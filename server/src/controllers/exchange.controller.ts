@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import { z } from "zod";
-import prisma from "../prisma";
-import { AppError } from "../utils/errors";
-import { sendExchangeNotificationEmail } from "../config/mailer";
+import { Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
+import prisma from '../prisma';
+import { AppError } from '../utils/errors';
+import { sendExchangeNotificationEmail } from '../config/mailer';
 
 export const requestExchange = async (
   req: Request,
@@ -11,7 +11,7 @@ export const requestExchange = async (
 ): Promise<void> => {
   try {
     if (!req.user) {
-      throw new AppError("Unauthorized", 401);
+      throw new AppError('Unauthorized', 401);
     }
 
     const { bookId } = req.params;
@@ -30,12 +30,12 @@ export const requestExchange = async (
     });
 
     if (!book) {
-      throw new AppError("Target book not found.", 404);
+      throw new AppError('Target book not found.', 404);
     }
 
     // Guard: Users cannot request exchange for their own books
     if (book.ownerId === req.user.id) {
-      throw new AppError("Cannot request an exchange for your own book.", 400);
+      throw new AppError('Cannot request an exchange for your own book.', 400);
     }
 
     // Fetch requester's available books
@@ -48,7 +48,10 @@ export const requestExchange = async (
     });
 
     // Send email notification to the book's owner
-    let emailResult = { messageId: 'local-dispatch', previewUrl: undefined as string | undefined };
+    let emailResult = {
+      messageId: 'local-dispatch',
+      previewUrl: undefined as string | undefined,
+    };
     try {
       emailResult = await sendExchangeNotificationEmail({
         toEmail: book.owner.email,
@@ -67,7 +70,7 @@ export const requestExchange = async (
       data: {
         fromUserId: req.user.id,
         toBookId: book.id,
-        status: "PENDING",
+        status: 'PENDING',
       },
       include: {
         toBook: {
@@ -83,7 +86,7 @@ export const requestExchange = async (
 
     res.status(201).json({
       message:
-        "Exchange request sent successfully! An email notification has been dispatched to the owner.",
+        'Exchange request sent successfully! An email notification has been dispatched to the owner.',
       previewUrl: emailResult.previewUrl,
       data: exchangeRequest,
     });
@@ -99,7 +102,7 @@ export const getMyRequests = async (
 ): Promise<void> => {
   try {
     if (!req.user) {
-      throw new AppError("Unauthorized", 401);
+      throw new AppError('Unauthorized', 401);
     }
 
     // 1. Requests sent by me
@@ -114,7 +117,7 @@ export const getMyRequests = async (
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
 
     // 2. Requests received for my books
@@ -132,7 +135,7 @@ export const getMyRequests = async (
           select: { id: true, title: true, author: true, photoUrl: true },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
 
     res.json({
@@ -145,7 +148,7 @@ export const getMyRequests = async (
 };
 
 const updateStatusSchema = z.object({
-  status: z.enum(["ACCEPTED", "REJECTED"]),
+  status: z.enum(['ACCEPTED', 'REJECTED']),
 });
 
 export const updateRequestStatus = async (
@@ -155,7 +158,7 @@ export const updateRequestStatus = async (
 ): Promise<void> => {
   try {
     if (!req.user) {
-      throw new AppError("Unauthorized", 401);
+      throw new AppError('Unauthorized', 401);
     }
 
     const { id } = req.params;
@@ -169,15 +172,12 @@ export const updateRequestStatus = async (
     });
 
     if (!request) {
-      throw new AppError("Exchange request not found", 404);
+      throw new AppError('Exchange request not found', 404);
     }
 
     // Only the owner of the book can accept or reject the request
     if (request.toBook.ownerId !== req.user.id) {
-      throw new AppError(
-        "Forbidden: Only the book owner can update this request.",
-        403,
-      );
+      throw new AppError('Forbidden: Only the book owner can update this request.', 403);
     }
 
     const updated = await prisma.exchangeRequest.update({

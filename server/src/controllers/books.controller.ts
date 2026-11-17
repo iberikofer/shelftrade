@@ -10,7 +10,11 @@ const createBookSchema = z.object({
   photoUrl: z.string().optional(),
 });
 
-export const getBooks = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getBooks = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const { search, sort = 'asc', page = '1', limit = '8' } = req.query;
 
@@ -70,7 +74,11 @@ export const getBooks = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
-export const getBookById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getBookById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -101,7 +109,11 @@ export const getBookById = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const createBook = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createBook = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     if (!req.user) {
       throw new AppError('Unauthorized', 401);
@@ -142,7 +154,11 @@ export const createBook = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const deleteBook = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const deleteBook = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     if (!req.user) {
       throw new AppError('Unauthorized', 401);
@@ -175,4 +191,3 @@ export const deleteBook = async (req: Request, res: Response, next: NextFunction
     next(err);
   }
 };
-

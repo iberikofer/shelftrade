@@ -19,17 +19,21 @@ const crimson = Crimson_Pro({
 
 export const metadata: Metadata = {
   title: 'ShelfTrade — Peer-to-Peer Book Exchange',
-  description: 'Exchange personal books directly with fellow readers. Search, trade, and discover.',
+  description:
+    'Exchange personal books directly with fellow readers. Search, trade, and discover.',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${crimson.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${crimson.variable}`}
+      suppressHydrationWarning
+    >
+      <body
+        className="min-h-screen flex flex-col bg-background text-foreground antialiased"
+        suppressHydrationWarning
+      >
         <Providers>
           <Navbar />
           <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
@@ -41,4 +45,3 @@ export default function RootLayout({
     </html>
   );
 }
-

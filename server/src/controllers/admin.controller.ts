@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from "express";
-import bcrypt from "bcryptjs";
-import { z } from "zod";
-import prisma from "../prisma";
-import { AppError } from "../utils/errors";
-import { Role } from "@prisma/client";
+import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcryptjs';
+import { z } from 'zod';
+import prisma from '../prisma';
+import { AppError } from '../utils/errors';
+import { Role } from '@prisma/client';
 
 export const getAdminStats = async (
   _req: Request,
@@ -36,7 +36,7 @@ export const getAllUsers = async (
 ): Promise<void> => {
   try {
     const users = await prisma.user.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         name: true,
@@ -54,7 +54,7 @@ export const getAllUsers = async (
     });
 
     res.json({
-      data: users.map((u) => ({
+      data: users.map(u => ({
         ...u,
         bookCount: u._count.books,
         requestsCount: u._count.requestsSent,
@@ -67,11 +67,11 @@ export const getAllUsers = async (
 };
 
 const createUserSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.enum(["USER", "ADMIN"]).default("USER"),
-  avatarUrl: z.string().url().optional().or(z.literal("")),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['USER', 'ADMIN']).default('USER'),
+  avatarUrl: z.string().url().optional().or(z.literal('')),
 });
 
 export const createUserByAdmin = async (
@@ -87,7 +87,7 @@ export const createUserByAdmin = async (
     });
 
     if (existing) {
-      throw new AppError("A user with this email already exists.", 409);
+      throw new AppError('A user with this email already exists.', 409);
     }
 
     const passwordHash = await bcrypt.hash(data.password, 10);
@@ -111,7 +111,7 @@ export const createUserByAdmin = async (
     });
 
     res.status(201).json({
-      message: "User created successfully",
+      message: 'User created successfully',
       data: newUser,
     });
   } catch (err) {
@@ -128,7 +128,7 @@ export const deleteUserByAdmin = async (
     const { id } = req.params;
 
     if (req.user?.id === id) {
-      throw new AppError("Cannot delete your own administrative account.", 400);
+      throw new AppError('Cannot delete your own administrative account.', 400);
     }
 
     const user = await prisma.user.findUnique({
@@ -136,7 +136,7 @@ export const deleteUserByAdmin = async (
     });
 
     if (!user) {
-      throw new AppError("User not found", 404);
+      throw new AppError('User not found', 404);
     }
 
     // Cascade deletes user and all their books/requests
@@ -145,7 +145,7 @@ export const deleteUserByAdmin = async (
     });
 
     res.json({
-      message: "User and all associated books successfully deleted",
+      message: 'User and all associated books successfully deleted',
       deletedId: id,
     });
   } catch (err) {
@@ -166,7 +166,7 @@ export const deleteAnyBookByAdmin = async (
     });
 
     if (!book) {
-      throw new AppError("Book not found", 404);
+      throw new AppError('Book not found', 404);
     }
 
     await prisma.book.delete({
@@ -174,7 +174,7 @@ export const deleteAnyBookByAdmin = async (
     });
 
     res.json({
-      message: "Book successfully deleted by administrator",
+      message: 'Book successfully deleted by administrator',
       deletedId: id,
     });
   } catch (err) {

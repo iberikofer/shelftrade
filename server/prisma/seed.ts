@@ -21,7 +21,8 @@ async function main() {
       email: 'admin@shelftrade.local',
       passwordHash,
       role: Role.ADMIN,
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      avatarUrl:
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     },
   });
 
@@ -32,7 +33,8 @@ async function main() {
       email: 'alice@shelftrade.local',
       passwordHash,
       role: Role.USER,
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+      avatarUrl:
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
     },
   });
 
@@ -43,7 +45,8 @@ async function main() {
       email: 'bob@shelftrade.local',
       passwordHash,
       role: Role.USER,
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+      avatarUrl:
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     },
   });
 
@@ -127,16 +130,17 @@ async function main() {
 
   console.log('✅ Seeding complete!');
   console.log(`- Admin: admin@shelftrade.local (Password123!)`);
-  console.log(`- User 1: alice@shelftrade.local (Password123!) [${aliceBooks.length} books]`);
+  console.log(
+    `- User 1: alice@shelftrade.local (Password123!) [${aliceBooks.length} books]`,
+  );
   console.log(`- User 2: bob@shelftrade.local (Password123!) [${bobBooks.length} books]`);
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('Seeding error:', e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
   });
-

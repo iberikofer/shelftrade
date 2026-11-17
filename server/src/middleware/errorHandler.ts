@@ -6,7 +6,7 @@ export const errorHandler = (
   err: unknown,
   _req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ): void => {
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
@@ -19,7 +19,7 @@ export const errorHandler = (
   if (err instanceof ZodError) {
     res.status(400).json({
       error: 'Validation failed',
-      details: err.errors.map((e) => ({
+      details: err.errors.map(e => ({
         path: e.path.join('.'),
         message: e.message,
       })),
@@ -32,4 +32,3 @@ export const errorHandler = (
     error: 'Internal server error',
   });
 };
-

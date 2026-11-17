@@ -20,7 +20,9 @@ export function useAddBook() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formDataOrJson: FormData | { title: string; author: string; photoUrl?: string }) => {
+    mutationFn: async (
+      formDataOrJson: FormData | { title: string; author: string; photoUrl?: string },
+    ) => {
       const isFormData = formDataOrJson instanceof FormData;
       const res = await api.post('/me/books', formDataOrJson, {
         headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,

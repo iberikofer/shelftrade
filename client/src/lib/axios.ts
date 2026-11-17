@@ -9,7 +9,7 @@ const api = axios.create({
 
 // Request interceptor to attach JWT token from localStorage
 api.interceptors.request.use(
-  (config) => {
+  config => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('shelftrade_token');
       if (token && config.headers) {
@@ -18,13 +18,13 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  error => Promise.reject(error),
 );
 
 // Response interceptor for automatic 401 handling
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('shelftrade_token');
       localStorage.removeItem('shelftrade_user');
@@ -32,8 +32,7 @@ api.interceptors.response.use(
       window.dispatchEvent(new CustomEvent('auth:unauthorized'));
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;
-

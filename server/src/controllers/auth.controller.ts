@@ -17,7 +17,11 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const data = registerSchema.parse(req.body);
 
@@ -66,7 +70,11 @@ export const register = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
-export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const data = loginSchema.parse(req.body);
 
@@ -107,7 +115,11 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   }
 };
 
-export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     if (!req.user) {
       throw new AppError('Unauthorized', 401);
@@ -146,4 +158,3 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
     next(err);
   }
 };
-

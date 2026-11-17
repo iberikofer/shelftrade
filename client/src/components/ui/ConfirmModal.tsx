@@ -31,7 +31,7 @@ export default function ConfirmModal({
   const isMounted = React.useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
 
   useEffect(() => {
@@ -73,9 +73,7 @@ export default function ConfirmModal({
             <h3 className="font-serif text-lg font-bold text-foreground leading-tight">
               {title}
             </h3>
-            <p className="text-sm text-muted mt-1 leading-relaxed">
-              {description}
-            </p>
+            <p className="text-sm text-muted mt-1 leading-relaxed">{description}</p>
           </div>
         </div>
 
@@ -94,6 +92,6 @@ export default function ConfirmModal({
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

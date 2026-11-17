@@ -25,10 +25,13 @@ async function getTransporter(): Promise<nodemailer.Transporter> {
   try {
     const etherealPromise = nodemailer.createTestAccount();
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Ethereal connection timeout')), 2000)
+      setTimeout(() => reject(new Error('Ethereal connection timeout')), 2000),
     );
 
-    const testAccount = (await Promise.race([etherealPromise, timeoutPromise])) as nodemailer.TestAccount;
+    const testAccount = (await Promise.race([
+      etherealPromise,
+      timeoutPromise,
+    ])) as nodemailer.TestAccount;
     transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
@@ -41,7 +44,9 @@ async function getTransporter(): Promise<nodemailer.Transporter> {
     console.log(`[Mailer] Ethereal test mailbox created: ${testAccount.user}`);
   } catch (_err) {
     // Zero-network fallback for robust offline development / testing
-    console.log('[Mailer] Offline/Local JSON transporter active (emails logged to terminal)');
+    console.log(
+      '[Mailer] Offline/Local JSON transporter active (emails logged to terminal)',
+    );
     transporter = nodemailer.createTransport({
       jsonTransport: true,
     });
@@ -61,11 +66,13 @@ export interface SendExchangeEmailOptions {
 
 export async function sendExchangeNotificationEmail(options: SendExchangeEmailOptions) {
   const mailer = await getTransporter();
-  const from = process.env.SMTP_FROM || '"ShelfTrade Community" <noreply@shelftrade.local>';
+  const from =
+    process.env.SMTP_FROM || '"ShelfTrade Community" <noreply@shelftrade.local>';
 
-  const booksListHtml = options.requesterBooks.length > 0
-    ? `<ul>${options.requesterBooks.map((b) => `<li><strong>${b.title}</strong> by ${b.author}</li>`).join('')}</ul>`
-    : '<p><em>No books currently listed on their shelf.</em></p>';
+  const booksListHtml =
+    options.requesterBooks.length > 0
+      ? `<ul>${options.requesterBooks.map(b => `<li><strong>${b.title}</strong> by ${b.author}</li>`).join('')}</ul>`
+      : '<p><em>No books currently listed on their shelf.</em></p>';
 
   const htmlContent = `
     <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #F5F0D0; color: #1A1A1A; border: 1px solid rgba(26,26,26,0.1); border-radius: 6px;">

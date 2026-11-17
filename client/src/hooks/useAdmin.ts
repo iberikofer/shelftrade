@@ -17,7 +17,9 @@ export interface AdminUser {
 }
 
 export function useAdminStats() {
-  return useQuery<{ stats: { totalUsers: number; totalBooks: number; totalRequests: number } }>({
+  return useQuery<{
+    stats: { totalUsers: number; totalBooks: number; totalRequests: number };
+  }>({
     queryKey: ['admin-stats'],
     queryFn: async () => {
       const res = await api.get('/admin/stats');
@@ -40,7 +42,12 @@ export function useAdminCreateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { name: string; email: string; password: string; role: 'USER' | 'ADMIN' }) => {
+    mutationFn: async (data: {
+      name: string;
+      email: string;
+      password: string;
+      role: 'USER' | 'ADMIN';
+    }) => {
       const res = await api.post('/admin/users', data);
       return res.data;
     },
