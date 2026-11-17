@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().trim().email('Please enter a valid email address').max(255),
 });
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;

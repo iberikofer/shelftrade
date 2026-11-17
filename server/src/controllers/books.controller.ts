@@ -3,11 +3,12 @@ import { z } from 'zod';
 import prisma from '../prisma';
 import { AppError } from '../utils/errors';
 import { Prisma } from '@prisma/client';
+import { safeUrlSchema as safePhotoUrlSchema } from '../utils/schemas';
 
 const createBookSchema = z.object({
-  title: z.string().min(1, 'Book title is required').max(200),
-  author: z.string().min(1, 'Author name is required').max(150),
-  photoUrl: z.string().optional(),
+  title: z.string().trim().min(1, 'Book title is required').max(200),
+  author: z.string().trim().min(1, 'Author name is required').max(150),
+  photoUrl: safePhotoUrlSchema,
 });
 
 export const getBooks = async (

@@ -59,6 +59,7 @@ model ExchangeRequest {
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 
+  @@unique([fromUserId, toBookId])
   @@map("exchange_requests")
 }
 

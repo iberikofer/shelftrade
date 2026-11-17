@@ -9,17 +9,25 @@ import {
 } from '../utils/jwt';
 import { AppError } from '../utils/errors';
 import { sendPasswordResetEmail, sendWelcomeEmail } from '../config/mailer';
+import { safeUrlSchema } from '../utils/schemas';
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  avatarUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+  name: z
+    .string()
+    .trim()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name cannot exceed 100 characters'),
+  email: z.string().trim().email('Invalid email address').max(255),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(128, 'Password cannot exceed 128 characters'),
+  avatarUrl: safeUrlSchema,
 });
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().trim().email('Invalid email address').max(255),
+  password: z.string().min(1, 'Password is required').max(128),
 });
 
 export const register = async (
@@ -173,7 +181,7 @@ export const getMe = async (
 };
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().trim().email('Please enter a valid email address').max(255),
 });
 
 export const forgotPassword = async (
@@ -210,8 +218,11 @@ export const forgotPassword = async (
 };
 
 const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  token: z.string().min(1, 'Reset token is required').max(1000),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(128, 'Password cannot exceed 128 characters'),
 });
 
 export const resetPassword = async (

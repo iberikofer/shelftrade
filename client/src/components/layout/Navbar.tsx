@@ -7,6 +7,7 @@ import { BookOpen, LogOut, Shield, ChevronDown, User as UserIcon } from 'lucide-
 import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
+import { resolveAvatarUrl } from '../../lib/resolveAvatarUrl';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -14,12 +15,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
-  const resolvedAvatarUrl = user?.avatarUrl
-    ? user.avatarUrl.startsWith('http')
-      ? user.avatarUrl
-      : `${serverUrl}${user.avatarUrl}`
-    : null;
+  const resolvedAvatarUrl = resolveAvatarUrl(user?.avatarUrl);
 
   const navLinks = [
     { href: '/books', label: 'Discover Books' },
@@ -109,7 +105,7 @@ export default function Navbar() {
               <div className="w-8 h-8 rounded-full bg-muted/20 animate-pulse" />
             </div>
           ) : isAuthenticated && user ? (
-            <div className="relative" ref={menuRef}>
+            <div className="relative h-16 flex items-center" ref={menuRef}>
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(prev => !prev)}
@@ -159,24 +155,36 @@ export default function Navbar() {
                 />
               </button>
 
-              {/* User Dropdown Menu */}
+              {/* User Dropdown Menu - Merged seamlessly with header bottom border */}
               {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-card border border-card-border rounded-sm shadow-lg py-2 z-50 animate-fadeIn">
-                  {/* Reader header in dropdown */}
-                  <div className="px-4 py-2.5 border-b border-card-border bg-background/50">
-                    <p className="font-serif font-bold text-sm text-foreground truncate">
-                      {user.name}
-                    </p>
-                    <p className="text-xs text-muted truncate mt-0.5">{user.email}</p>
-                    <div className="mt-2">
-                      <Badge variant={isAdmin ? 'primary' : 'olive'} size="sm">
-                        {isAdmin ? 'ADMINISTRATOR' : 'READER MEMBER'}
+                <div className="absolute right-0 top-full -mt-px w-60 bg-card border border-card-border border-t-0 rounded-b-sm rounded-t-none shadow-xl py-1.5 z-50 animate-fadeIn">
+                  {/* Top badge panel: ONLY for Admin, completely omitted for regular users */}
+                  {isAdmin && (
+                    <div className="px-3 py-2 border-b border-card-border flex justify-center bg-primary/[0.03]">
+                      <Badge variant="primary" size="sm">
+                        ADMINISTRATOR
                       </Badge>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Navigation Links */}
+                  {/* Navigation Links: Reader Profile first, then My Books & Exchanges */}
                   <div className="py-1">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`
+                        w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-colors
+                        ${
+                          pathname === '/profile'
+                            ? 'bg-primary/10 text-primary font-bold'
+                            : 'text-foreground hover:bg-black/[0.04]'
+                        }
+                      `}
+                    >
+                      <UserIcon className="w-4 h-4 text-muted" />
+                      <span>Reader Profile</span>
+                    </Link>
+
                     <Link
                       href="/me/books"
                       onClick={() => setIsMenuOpen(false)}
@@ -199,40 +207,6 @@ export default function Navbar() {
                         </span>
                       )}
                     </Link>
-
-                    <Link
-                      href="/profile"
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`
-                        w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-colors
-                        ${
-                          pathname === '/profile'
-                            ? 'bg-primary/10 text-primary font-bold'
-                            : 'text-foreground hover:bg-black/[0.04]'
-                        }
-                      `}
-                    >
-                      <UserIcon className="w-4 h-4 text-muted" />
-                      <span>Reader Profile</span>
-                    </Link>
-
-                    {isAdmin && (
-                      <Link
-                        href="/admin"
-                        onClick={() => setIsMenuOpen(false)}
-                        className={`
-                          w-full flex items-center gap-2.5 px-4 py-2 text-xs font-medium transition-colors
-                          ${
-                            pathname === '/admin'
-                              ? 'bg-primary/10 text-primary font-bold'
-                              : 'text-foreground hover:bg-black/[0.04]'
-                          }
-                        `}
-                      >
-                        <Shield className="w-4 h-4 text-primary" />
-                        <span>Admin Console</span>
-                      </Link>
-                    )}
                   </div>
 
                   {/* Logout Action */}

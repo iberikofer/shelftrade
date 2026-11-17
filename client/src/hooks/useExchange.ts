@@ -58,7 +58,7 @@ export function useRequestExchange() {
       toast.success('Exchange request sent! The owner was notified via email.');
       queryClient.invalidateQueries({ queryKey: ['exchange-requests'] });
       queryClient.invalidateQueries({ queryKey: ['book'] });
-      if (data.previewUrl) {
+      if (process.env.NODE_ENV === 'development' && data.previewUrl) {
         console.log('[ShelfTrade Mailer] Test Email Preview URL:', data.previewUrl);
       }
     },

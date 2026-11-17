@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import prisma from '../prisma';
 import { AppError } from '../utils/errors';
+import { safeUrlSchema } from '../utils/schemas';
 
 export const getMyBooks = async (
   req: Request,
@@ -70,8 +71,13 @@ export const deleteMyBook = async (
 };
 
 const updateProfileSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
-  avatarUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+  name: z
+    .string()
+    .trim()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100)
+    .optional(),
+  avatarUrl: safeUrlSchema,
 });
 
 export const updateMyProfile = async (

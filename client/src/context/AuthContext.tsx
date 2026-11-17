@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import api from '../lib/axios';
 import { queryClient } from '../lib/queryClient';
+import { STORAGE_KEYS } from '../lib/constants';
 
 export interface User {
   id: string;
@@ -23,7 +24,6 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
@@ -36,28 +36,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('shelftrade_token');
-    localStorage.removeItem('shelftrade_user');
-    setToken(null);
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER);
     setUser(null);
     queryClient.clear();
   }, []);
 
   const login = useCallback((newToken: string, newUser: User) => {
-    localStorage.setItem('shelftrade_token', newToken);
-    localStorage.setItem('shelftrade_user', JSON.stringify(newUser));
-    setToken(newToken);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, newToken);
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(newUser));
     setUser(newUser);
     queryClient.clear();
   }, []);
 
   const refreshUser = useCallback(async () => {
     try {
-      const storedToken = localStorage.getItem('shelftrade_token');
+      const storedToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
       if (!storedToken) {
         setIsLoading(false);
         return;
@@ -65,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.get('/auth/me');
       if (res.data?.user) {
         setUser(res.data.user);
-        localStorage.setItem('shelftrade_user', JSON.stringify(res.data.user));
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(res.data.user));
       }
     } catch {
       logout();
@@ -77,16 +74,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const storedToken = localStorage.getItem('shelftrade_token');
-        const storedUser = localStorage.getItem('shelftrade_user');
+        const storedToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
+        const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
 
         if (storedToken && storedUser) {
           try {
             const parsedUser = JSON.parse(storedUser);
-            setToken(storedToken);
             setUser(parsedUser);
           } catch {
-            localStorage.removeItem('shelftrade_user');
+            localStorage.removeItem(STORAGE_KEYS.USER);
           }
         }
       } finally {
@@ -95,13 +91,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Background re-validation against the server
-      const token = localStorage.getItem('shelftrade_token');
+      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
       if (token) {
         try {
           const res = await api.get('/auth/me');
           if (res.data?.user) {
             setUser(res.data.user);
-            localStorage.setItem('shelftrade_user', JSON.stringify(res.data.user));
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(res.data.user));
           }
         } catch {
           logout();
@@ -112,13 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
 
     // Listen for unauthorized events emitted by axios interceptor
-    const handleUnauthorized = () => {
-      logout();
-    };
-
-    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    window.addEventListener('auth:unauthorized', logout);
     return () => {
-      window.removeEventListener('auth:unauthorized', handleUnauthorized);
+      window.removeEventListener('auth:unauthorized', logout);
     };
   }, [logout]);
 
@@ -126,9 +118,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        token,
         isLoading,
-        isAuthenticated: !!user && !!token,
+        isAuthenticated: !!user,
         isAdmin: user?.role === 'ADMIN',
         login,
         logout,

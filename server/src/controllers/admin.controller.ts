@@ -66,12 +66,34 @@ export const getAllUsers = async (
   }
 };
 
+const safeUrlSchema = z
+  .string()
+  .max(1000)
+  .refine(
+    val => {
+      if (!val || val.trim() === '') return true;
+      if (val.startsWith('/uploads/')) return true;
+      try {
+        const parsed = new URL(val);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    },
+    { message: 'Avatar URL must start with http:// or https://' },
+  )
+  .optional()
+  .or(z.literal(''));
+
 const createUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
+  email: z.string().trim().email('Invalid email address').max(255),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(128, 'Password cannot exceed 128 characters'),
   role: z.enum(['USER', 'ADMIN']).default('USER'),
-  avatarUrl: z.string().url().optional().or(z.literal('')),
+  avatarUrl: safeUrlSchema,
 });
 
 export const createUserByAdmin = async (
@@ -175,6 +197,79 @@ export const deleteAnyBookByAdmin = async (
 
     res.json({
       message: 'Book successfully deleted by administrator',
+      deletedId: id,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getAllExchangeRequests = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const requests = await prisma.exchangeRequest.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        fromUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatarUrl: true,
+          },
+        },
+        toBook: {
+          select: {
+            id: true,
+            title: true,
+            author: true,
+            photoUrl: true,
+            owner: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    res.json({
+      data: requests,
+      total: requests.length,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteExchangeRequestByAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const request = await prisma.exchangeRequest.findUnique({
+      where: { id },
+    });
+
+    if (!request) {
+      throw new AppError('Exchange request not found', 404);
+    }
+
+    await prisma.exchangeRequest.delete({
+      where: { id },
+    });
+
+    res.json({
+      message: 'Exchange request deleted by administrator',
       deletedId: id,
     });
   } catch (err) {

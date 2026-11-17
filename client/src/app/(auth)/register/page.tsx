@@ -17,10 +17,13 @@ import axios from 'axios';
 
 const registerSchema = z
   .object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Please enter a valid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
+    email: z.string().trim().email('Please enter a valid email address').max(255),
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters')
+      .max(128, 'Password cannot exceed 128 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password').max(128),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
@@ -114,31 +117,41 @@ export default function RegisterPage() {
 
           {/* Quick Demo Access */}
           <div className="pt-4 border-t border-[#8B2020]/30">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-[#8A7F6A] font-semibold mb-2">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[#D4AF37] font-semibold mb-2">
               Reader Demo Pass (1-Click Fill)
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => fillDemo('Alice Hemingway', 'alice@shelftrade.local')}
-                className="p-2 rounded-xs border border-[#8B2020]/50 bg-[#170E0B] hover:bg-[#2F1D17] text-left transition-colors cursor-pointer"
+                className="p-2.5 rounded-sm bg-[#FFFDF7] hover:bg-[#FDF6E2] border-2 border-[#D4AF37]/80 hover:border-[#D4AF37] text-left transition-all shadow-sm cursor-pointer group hover:scale-[1.02]"
               >
-                <div className="font-semibold text-[#FAF7EE] text-[11px]">
-                  Alice (Reader)
+                <div className="flex items-center justify-between">
+                  <span className="font-serif font-bold text-[#1F1916] text-xs group-hover:text-primary transition-colors">
+                    Alice
+                  </span>
+                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-xs bg-[#D4AF37]/20 text-[#854D0E]">
+                    READER
+                  </span>
                 </div>
-                <div className="text-[9px] font-mono text-[#8A7F6A] truncate">
+                <div className="text-[10px] font-mono text-[#574C43] truncate mt-1">
                   alice@shelftrade.local
                 </div>
               </button>
               <button
                 type="button"
                 onClick={() => fillDemo('Admin Moderator', 'admin@shelftrade.local')}
-                className="p-2 rounded-xs border border-[#8B2020]/50 bg-[#170E0B] hover:bg-[#2F1D17] text-left transition-colors cursor-pointer"
+                className="p-2.5 rounded-sm bg-[#FFFDF7] hover:bg-[#FDF6E2] border-2 border-[#D4AF37]/80 hover:border-[#D4AF37] text-left transition-all shadow-sm cursor-pointer group hover:scale-[1.02]"
               >
-                <div className="font-semibold text-[#FAF7EE] text-[11px]">
-                  Admin Moderator
+                <div className="flex items-center justify-between">
+                  <span className="font-serif font-bold text-[#1F1916] text-xs group-hover:text-primary transition-colors">
+                    Admin
+                  </span>
+                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-xs bg-primary/15 text-primary">
+                    ADMIN
+                  </span>
                 </div>
-                <div className="text-[9px] font-mono text-[#8A7F6A] truncate">
+                <div className="text-[10px] font-mono text-[#574C43] truncate mt-1">
                   admin@shelftrade.local
                 </div>
               </button>

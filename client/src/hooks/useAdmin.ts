@@ -117,3 +117,61 @@ export function useAdminDeleteBook() {
     },
   });
 }
+
+export interface AdminExchangeRequest {
+  id: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  createdAt: string;
+  fromUser: {
+    id: string;
+    name: string;
+    email: string;
+    avatarUrl?: string | null;
+  };
+  toBook: {
+    id: string;
+    title: string;
+    author: string;
+    photoUrl?: string | null;
+    owner?: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  };
+}
+
+export function useAdminExchangeRequests() {
+  const { user, isAdmin } = useAuth();
+
+  return useQuery<{ data: AdminExchangeRequest[]; total: number }>({
+    queryKey: ['admin-exchange-requests', user?.id],
+    queryFn: async () => {
+      const res = await api.get('/admin/exchange-requests');
+      return res.data;
+    },
+    enabled: !!isAdmin,
+  });
+}
+
+export function useAdminDeleteExchangeRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await api.delete(`/admin/exchange-requests/${id}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Exchange request removed.');
+      queryClient.invalidateQueries({ queryKey: ['admin-exchange-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+    },
+    onError: (error: unknown) => {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.error
+        : 'Failed to delete exchange request.';
+      toast.error(message || 'Failed to delete exchange request.');
+    },
+  });
+}

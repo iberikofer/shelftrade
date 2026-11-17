@@ -18,9 +18,17 @@ const crimson = Crimson_Pro({
 });
 
 export const metadata: Metadata = {
-  title: 'ShelfTrade — Peer-to-Peer Book Exchange',
+  title: 'ShelfTrade',
   description:
     'Exchange personal books directly with fellow readers. Search, trade, and discover.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg?v=4', type: 'image/svg+xml' },
+      { url: '/icon?v=4', type: 'image/png' },
+    ],
+    shortcut: '/favicon.svg?v=4',
+    apple: '/icon?v=4',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

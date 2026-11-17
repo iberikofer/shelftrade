@@ -17,8 +17,11 @@ import axios from 'axios';
 
 const resetPasswordSchema = z
   .object({
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your new password'),
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters')
+      .max(128, 'Password cannot exceed 128 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your new password').max(128),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords do not match',

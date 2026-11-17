@@ -17,6 +17,10 @@ import {
   ArrowLeft,
   ExternalLink,
   Search,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Filter,
 } from 'lucide-react';
 import AdminRoute from '../../components/auth/AdminRoute';
 import {
@@ -25,7 +29,10 @@ import {
   useAdminCreateUser,
   useAdminDeleteUser,
   useAdminDeleteBook,
+  useAdminExchangeRequests,
+  useAdminDeleteExchangeRequest,
   AdminUser,
+  AdminExchangeRequest,
 } from '../../hooks/useAdmin';
 import { useBooks } from '../../hooks/useBooks';
 import { BookItem } from '../../components/books/BookCard';
@@ -38,9 +45,12 @@ import Spinner from '../../components/ui/Spinner';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 
 const createUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
+  email: z.string().trim().email('Please enter a valid email address').max(255),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(128, 'Password cannot exceed 128 characters'),
   role: z.enum(['USER', 'ADMIN']),
 });
 
@@ -48,16 +58,25 @@ type CreateUserFormData = z.infer<typeof createUserSchema>;
 
 export default function AdminPage() {
   const { user: currentUser } = useAuth();
-  const [selectedView, setSelectedView] = useState<'users' | 'books'>('users');
+  const [selectedView, setSelectedView] = useState<'users' | 'books' | 'requests'>(
+    'users',
+  );
   const [selectedUserFilter, setSelectedUserFilter] = useState<{
     id: string;
     name: string;
   } | null>(null);
   const [bookSearch, setBookSearch] = useState('');
+  const [requestSearch, setRequestSearch] = useState('');
+  const [requestStatusFilter, setRequestStatusFilter] = useState<
+    'ALL' | 'PENDING' | 'ACCEPTED' | 'REJECTED'
+  >('ALL');
 
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
   const [bookToDelete, setBookToDelete] = useState<BookItem | null>(null);
+  const [requestToDelete, setRequestToDelete] = useState<AdminExchangeRequest | null>(
+    null,
+  );
 
   const { data: statsData, isLoading: isStatsLoading } = useAdminStats();
   const { data: usersData, isLoading: isUsersLoading } = useAdminUsers();
@@ -68,9 +87,12 @@ export default function AdminPage() {
     limit: 100,
   });
 
+  const { data: exchangeData, isLoading: isExchangeLoading } = useAdminExchangeRequests();
+
   const createUserMutation = useAdminCreateUser();
   const deleteUserMutation = useAdminDeleteUser();
   const deleteBookMutation = useAdminDeleteBook();
+  const deleteExchangeMutation = useAdminDeleteExchangeRequest();
 
   const {
     register,
@@ -111,6 +133,43 @@ export default function AdminPage() {
     });
   };
 
+  const handleConfirmDeleteRequest = () => {
+    if (!requestToDelete) return;
+    deleteExchangeMutation.mutate(requestToDelete.id, {
+      onSuccess: () => {
+        setRequestToDelete(null);
+      },
+    });
+  };
+
+  // Filter exchange requests based on search term and status
+  const filteredExchangeRequests =
+    exchangeData?.data?.filter(req => {
+      const matchesStatus =
+        requestStatusFilter === 'ALL' || req.status === requestStatusFilter;
+
+      if (!matchesStatus) return false;
+
+      if (!requestSearch.trim()) return true;
+
+      const q = requestSearch.toLowerCase().trim();
+      const bookTitle = req.toBook?.title?.toLowerCase() || '';
+      const bookAuthor = req.toBook?.author?.toLowerCase() || '';
+      const requesterName = req.fromUser?.name?.toLowerCase() || '';
+      const requesterEmail = req.fromUser?.email?.toLowerCase() || '';
+      const ownerName = req.toBook?.owner?.name?.toLowerCase() || '';
+      const ownerEmail = req.toBook?.owner?.email?.toLowerCase() || '';
+
+      return (
+        bookTitle.includes(q) ||
+        bookAuthor.includes(q) ||
+        requesterName.includes(q) ||
+        requesterEmail.includes(q) ||
+        ownerName.includes(q) ||
+        ownerEmail.includes(q)
+      );
+    }) || [];
+
   return (
     <AdminRoute>
       <div className="flex flex-col gap-8 animate-fadeIn">
@@ -138,128 +197,152 @@ export default function AdminPage() {
           </Button>
         </div>
 
-        {/* Stats Metrics Cards with Interactive Switching */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Unified 3-Tab Bar (Registered Users, Listed Books, Exchange Requests) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          {/* Tab 1: Registered Users */}
           <button
             type="button"
             onClick={() => {
               setSelectedView('users');
               setSelectedUserFilter(null);
             }}
-            className={`bg-card border rounded-sm p-5 flex items-center gap-4 shadow-xs text-left cursor-pointer transition-all ${
+            className={`p-4 sm:p-5 rounded-sm flex items-center justify-between transition-all cursor-pointer text-left shadow-xs ${
               selectedView === 'users' && !selectedUserFilter
-                ? 'border-primary ring-2 ring-primary/30 bg-primary/[0.02]'
-                : 'border-card-border hover:border-card-border-hover'
+                ? 'bg-primary/[0.04] border-2 border-primary text-primary shadow-xs ring-1 ring-primary/20'
+                : 'bg-card border border-card-border text-muted hover:text-foreground hover:border-card-border-hover hover:bg-black/[0.01]'
             }`}
           >
-            <div className="w-12 h-12 rounded-sm bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Users className="w-6 h-6" />
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-10 h-10 rounded-xs flex items-center justify-center shrink-0 ${
+                  selectedView === 'users' && !selectedUserFilter
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'bg-primary/10 text-primary'
+                }`}
+              >
+                <Users className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs uppercase font-mono tracking-wider font-semibold">
+                  Registered Users
+                </span>
+                <span className="text-xl font-serif font-bold text-foreground mt-0.5">
+                  {isUsersLoading || isStatsLoading ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    (usersData?.total ?? statsData?.stats.totalUsers ?? 0)
+                  )}
+                </span>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-mono uppercase tracking-wider text-muted font-semibold">
-                Total Users
-              </p>
-              <p className="font-serif text-2xl font-bold text-foreground mt-0.5">
-                {isStatsLoading ? (
-                  <Spinner size="sm" />
-                ) : (
-                  (statsData?.stats.totalUsers ?? 0)
-                )}
-              </p>
-            </div>
+            <span
+              className={`text-xs font-mono font-semibold px-2.5 py-1 rounded-xs shrink-0 ${
+                selectedView === 'users' && !selectedUserFilter
+                  ? 'bg-primary text-white'
+                  : 'bg-black/[0.06] text-muted'
+              }`}
+            >
+              {usersData?.total ?? statsData?.stats.totalUsers ?? 0}
+            </span>
           </button>
 
+          {/* Tab 2: Listed Books */}
           <button
             type="button"
             onClick={() => {
               setSelectedView('books');
               setSelectedUserFilter(null);
             }}
-            className={`bg-card border rounded-sm p-5 flex items-center gap-4 shadow-xs text-left cursor-pointer transition-all ${
+            className={`p-4 sm:p-5 rounded-sm flex items-center justify-between transition-all cursor-pointer text-left shadow-xs ${
               selectedView === 'books'
-                ? 'border-secondary ring-2 ring-secondary/30 bg-secondary/[0.02]'
-                : 'border-card-border hover:border-card-border-hover'
+                ? 'bg-secondary/[0.04] border-2 border-secondary text-secondary shadow-xs ring-1 ring-secondary/20'
+                : 'bg-card border border-card-border text-muted hover:text-foreground hover:border-card-border-hover hover:bg-black/[0.01]'
             }`}
           >
-            <div className="w-12 h-12 rounded-sm bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
-              <BookOpen className="w-6 h-6" />
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-10 h-10 rounded-xs flex items-center justify-center shrink-0 ${
+                  selectedView === 'books'
+                    ? 'bg-secondary text-white shadow-xs'
+                    : 'bg-secondary/10 text-secondary'
+                }`}
+              >
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs uppercase font-mono tracking-wider font-semibold">
+                  {selectedUserFilter
+                    ? `${selectedUserFilter.name}'s Books`
+                    : 'All Listed Books'}
+                </span>
+                <span className="text-xl font-serif font-bold text-foreground mt-0.5">
+                  {isBooksLoading || isStatsLoading ? (
+                    <Spinner size="sm" />
+                  ) : selectedUserFilter ? (
+                    booksData?.data?.length || 0
+                  ) : (
+                    (statsData?.stats.totalBooks ?? booksData?.pagination?.total ?? 0)
+                  )}
+                </span>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-mono uppercase tracking-wider text-muted font-semibold">
-                Listed Books
-              </p>
-              <p className="font-serif text-2xl font-bold text-foreground mt-0.5">
-                {isStatsLoading ? (
-                  <Spinner size="sm" />
-                ) : (
-                  (statsData?.stats.totalBooks ?? 0)
-                )}
-              </p>
-            </div>
-          </button>
-
-          <div className="bg-card border border-card-border rounded-sm p-5 flex items-center gap-4 shadow-xs">
-            <div className="w-12 h-12 rounded-sm bg-olive/10 text-olive flex items-center justify-center shrink-0">
-              <ArrowLeftRight className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-xs font-mono uppercase tracking-wider text-muted font-semibold">
-                Exchange Requests
-              </p>
-              <p className="font-serif text-2xl font-bold text-foreground mt-0.5">
-                {isStatsLoading ? (
-                  <Spinner size="sm" />
-                ) : (
-                  (statsData?.stats.totalRequests ?? 0)
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* View Switcher Tabs */}
-        <div className="flex border-b border-card-border gap-6">
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedView('users');
-              setSelectedUserFilter(null);
-            }}
-            className={`pb-3 text-sm font-semibold transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
-              selectedView === 'users'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted hover:text-foreground'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Registered Users</span>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-xs bg-black/[0.05] text-muted">
-              {usersData?.total || 0}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedView('books');
-              setSelectedUserFilter(null);
-            }}
-            className={`pb-3 text-sm font-semibold transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
-              selectedView === 'books'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted hover:text-foreground'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>
-              {selectedUserFilter
-                ? `${selectedUserFilter.name}'s Books`
-                : 'All Listed Books'}
-            </span>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-xs bg-black/[0.05] text-muted">
+            <span
+              className={`text-xs font-mono font-semibold px-2.5 py-1 rounded-xs shrink-0 ${
+                selectedView === 'books'
+                  ? 'bg-secondary text-white'
+                  : 'bg-black/[0.06] text-muted'
+              }`}
+            >
               {selectedUserFilter
                 ? booksData?.data?.length || 0
-                : statsData?.stats.totalBooks || 0}
+                : (statsData?.stats.totalBooks ?? booksData?.pagination?.total ?? 0)}
+            </span>
+          </button>
+
+          {/* Tab 3: Exchange Requests */}
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedView('requests');
+              setSelectedUserFilter(null);
+            }}
+            className={`p-4 sm:p-5 rounded-sm flex items-center justify-between transition-all cursor-pointer text-left shadow-xs ${
+              selectedView === 'requests'
+                ? 'bg-olive/[0.04] border-2 border-olive text-olive shadow-xs ring-1 ring-olive/20'
+                : 'bg-card border border-card-border text-muted hover:text-foreground hover:border-card-border-hover hover:bg-black/[0.01]'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-10 h-10 rounded-xs flex items-center justify-center shrink-0 ${
+                  selectedView === 'requests'
+                    ? 'bg-olive text-white shadow-xs'
+                    : 'bg-olive/10 text-olive'
+                }`}
+              >
+                <ArrowLeftRight className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs uppercase font-mono tracking-wider font-semibold">
+                  Exchange Requests
+                </span>
+                <span className="text-xl font-serif font-bold text-foreground mt-0.5">
+                  {isExchangeLoading || isStatsLoading ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    (exchangeData?.total ?? statsData?.stats.totalRequests ?? 0)
+                  )}
+                </span>
+              </div>
+            </div>
+            <span
+              className={`text-xs font-mono font-semibold px-2.5 py-1 rounded-xs shrink-0 ${
+                selectedView === 'requests'
+                  ? 'bg-olive text-white'
+                  : 'bg-black/[0.06] text-muted'
+              }`}
+            >
+              {exchangeData?.total ?? statsData?.stats.totalRequests ?? 0}
             </span>
           </button>
         </div>
@@ -591,6 +674,274 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* VIEW 3: EXCHANGE REQUESTS MODERATION TABLE */}
+        {selectedView === 'requests' && (
+          <div className="bg-card border border-card-border rounded-sm overflow-hidden shadow-xs">
+            {/* Header & Filters */}
+            <div className="p-5 border-b border-card-border flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-serif text-lg font-bold text-foreground">
+                    Exchange Requests ({filteredExchangeRequests.length} of{' '}
+                    {exchangeData?.total || 0})
+                  </h2>
+                  <p className="text-xs text-muted mt-0.5">
+                    Overview of all book swap proposals between readers across the
+                    community.
+                  </p>
+                </div>
+
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />
+                  <input
+                    type="text"
+                    value={requestSearch}
+                    onChange={e => setRequestSearch(e.target.value)}
+                    placeholder="Search book, author, user..."
+                    className="pl-8 pr-3 py-1.5 text-xs rounded-sm border border-card-border bg-background text-foreground focus-ring w-56 sm:w-64"
+                  />
+                  {requestSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setRequestSearch('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-foreground p-0.5 cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Status Filter Tabs */}
+              <div className="flex items-center gap-2 pt-1 border-t border-card-border/60">
+                <span className="text-[11px] font-mono text-muted flex items-center gap-1 mr-1">
+                  <Filter className="w-3 h-3" />
+                  Status:
+                </span>
+                {(['ALL', 'PENDING', 'ACCEPTED', 'REJECTED'] as const).map(status => {
+                  const isActive = requestStatusFilter === status;
+                  const count =
+                    status === 'ALL'
+                      ? exchangeData?.total || 0
+                      : exchangeData?.data?.filter(r => r.status === status).length || 0;
+
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => setRequestStatusFilter(status)}
+                      className={`px-2.5 py-1 rounded-xs text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                        isActive
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'bg-background/60 hover:bg-background text-muted hover:text-foreground border border-card-border'
+                      }`}
+                    >
+                      <span>
+                        {status === 'ALL'
+                          ? 'All'
+                          : status.charAt(0) + status.slice(1).toLowerCase()}
+                      </span>
+                      <span
+                        className={`text-[10px] font-mono px-1 py-0.2 rounded-xs ${
+                          isActive ? 'bg-white/20' : 'bg-black/[0.05]'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {isExchangeLoading ? (
+              <div className="p-12 flex flex-col items-center justify-center gap-3">
+                <Spinner size="lg" />
+                <p className="text-xs text-muted">Retrieving exchange proposals...</p>
+              </div>
+            ) : filteredExchangeRequests.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-background/80 text-muted font-mono uppercase tracking-wider border-b border-card-border">
+                    <tr>
+                      <th className="px-5 py-3">Book</th>
+                      <th className="px-5 py-3">Author</th>
+                      <th className="px-5 py-3">Requester</th>
+                      <th className="px-5 py-3">Owner</th>
+                      <th className="px-5 py-3">Status</th>
+                      <th className="px-5 py-3">Date</th>
+                      <th className="px-5 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-card-border">
+                    {filteredExchangeRequests.map(req => {
+                      return (
+                        <tr
+                          key={req.id}
+                          className="hover:bg-background/40 transition-colors"
+                        >
+                          {/* Book Photo Thumbnail + Title */}
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-3">
+                              <Link
+                                href={`/books/${req.toBook.id}`}
+                                className="w-10 h-14 rounded-xs overflow-hidden shrink-0 border border-card-border bg-muted/15 shadow-2xs hover:opacity-85 transition-opacity"
+                                title="Open book details"
+                              >
+                                <BookCover
+                                  src={req.toBook.photoUrl}
+                                  title={req.toBook.title}
+                                  author={req.toBook.author}
+                                  size="sm"
+                                  aspectRatio="h-full w-full"
+                                />
+                              </Link>
+                              <div>
+                                <Link
+                                  href={`/books/${req.toBook.id}`}
+                                  className="font-serif font-bold text-sm text-foreground hover:text-primary transition-colors flex items-center gap-1 group"
+                                >
+                                  <span>{req.toBook.title}</span>
+                                  <ExternalLink className="w-3 h-3 text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </Link>
+                                <span className="text-[11px] font-mono text-muted">
+                                  Request #{req.id.slice(0, 8)}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Author */}
+                          <td className="px-5 py-3.5 font-medium text-foreground">
+                            {req.toBook.author}
+                          </td>
+
+                          {/* Requester details */}
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-2">
+                              {req.fromUser.avatarUrl ? (
+                                <img
+                                  src={req.fromUser.avatarUrl}
+                                  alt={req.fromUser.name}
+                                  className="w-7 h-7 rounded-full object-cover border border-card-border shrink-0"
+                                />
+                              ) : (
+                                <div className="w-7 h-7 rounded-full bg-secondary/15 text-secondary text-xs font-bold flex items-center justify-center shrink-0">
+                                  {req.fromUser.name.charAt(0)}
+                                </div>
+                              )}
+                              <div className="flex flex-col">
+                                <span className="font-semibold text-foreground">
+                                  {req.fromUser.name}
+                                </span>
+                                <a
+                                  href={`mailto:${req.fromUser.email}`}
+                                  className="text-primary hover:underline flex items-center gap-1 text-[11px]"
+                                >
+                                  <Mail className="w-3 h-3 text-muted" />
+                                  {req.fromUser.email}
+                                </a>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Book Owner details */}
+                          <td className="px-5 py-3.5">
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-foreground">
+                                {req.toBook.owner?.name}
+                              </span>
+                              <a
+                                href={`mailto:${req.toBook.owner?.email}`}
+                                className="text-muted hover:text-foreground flex items-center gap-1 text-[11px]"
+                              >
+                                <Mail className="w-3 h-3 text-muted" />
+                                {req.toBook.owner?.email}
+                              </a>
+                            </div>
+                          </td>
+
+                          {/* Status Badge */}
+                          <td className="px-5 py-3.5">
+                            <Badge
+                              variant={
+                                req.status === 'ACCEPTED'
+                                  ? 'olive'
+                                  : req.status === 'REJECTED'
+                                    ? 'rust'
+                                    : 'secondary'
+                              }
+                              size="sm"
+                              className="flex items-center gap-1 w-fit"
+                            >
+                              {req.status === 'ACCEPTED' ? (
+                                <CheckCircle2 className="w-3 h-3" />
+                              ) : req.status === 'REJECTED' ? (
+                                <XCircle className="w-3 h-3" />
+                              ) : (
+                                <Clock className="w-3 h-3" />
+                              )}
+                              <span>{req.status}</span>
+                            </Badge>
+                          </td>
+
+                          {/* Date */}
+                          <td className="px-5 py-3.5 text-muted font-mono">
+                            {new Date(req.createdAt).toLocaleDateString()}
+                          </td>
+
+                          {/* Action: Delete request */}
+                          <td className="px-5 py-3.5 text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setRequestToDelete(req)}
+                              className="text-muted hover:text-rust p-1.5"
+                              title="Delete request"
+                              aria-label="Delete request"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-12 text-center bg-card">
+                <ArrowLeftRight className="w-10 h-10 text-muted mx-auto mb-2 opacity-40" />
+                <h3 className="font-serif text-base font-bold text-foreground">
+                  No exchange requests found
+                </h3>
+                <p className="text-xs text-muted mt-1 max-w-sm mx-auto">
+                  {requestSearch
+                    ? `No requests matching "${requestSearch}".`
+                    : requestStatusFilter !== 'ALL'
+                      ? `No exchange proposals with status "${requestStatusFilter}".`
+                      : 'No book exchange requests have been proposed on the platform yet.'}
+                </p>
+                {(requestSearch || requestStatusFilter !== 'ALL') && (
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setRequestSearch('');
+                        setRequestStatusFilter('ALL');
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Modal: Create User */}
         {showAddUserModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[2px] animate-fadeIn">
@@ -702,6 +1053,20 @@ export default function AdminPage() {
             confirmText="Delete Book"
             variant="danger"
             isLoading={deleteBookMutation.isPending}
+          />
+        )}
+
+        {/* Modal: Confirm Delete Exchange Request */}
+        {requestToDelete && (
+          <ConfirmModal
+            isOpen={!!requestToDelete}
+            onClose={() => setRequestToDelete(null)}
+            onConfirm={handleConfirmDeleteRequest}
+            title="Delete Exchange Request?"
+            description={`Are you sure you want to delete the exchange request for "${requestToDelete.toBook.title}" proposed by ${requestToDelete.fromUser.name}? This action cannot be undone.`}
+            confirmText="Delete Request"
+            variant="danger"
+            isLoading={deleteExchangeMutation.isPending}
           />
         )}
       </div>

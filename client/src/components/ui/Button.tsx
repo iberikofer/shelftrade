@@ -59,7 +59,7 @@ export default function Button({
     >
       {isLoading ? (
         <>
-          <Spinner size={size === 'sm' ? 'sm' : 'sm'} className="text-current" />
+          <Spinner size={size === 'lg' ? 'md' : 'sm'} className="text-current" />
           <span>{children}</span>
         </>
       ) : (

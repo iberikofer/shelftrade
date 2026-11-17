@@ -25,10 +25,12 @@ import Badge from '../../components/ui/Badge';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { safeUrlSchema } from '../../lib/schemas';
+import { resolveAvatarUrl } from '../../lib/resolveAvatarUrl';
 
 const profileSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(80),
-  avatarUrl: z.string().url('Invalid URL').optional().or(z.literal('')),
+  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(80),
+  avatarUrl: safeUrlSchema,
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -41,12 +43,7 @@ export default function ProfilePage() {
   const [fileKey, setFileKey] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
-  const resolvedAvatarUrl = user?.avatarUrl
-    ? user.avatarUrl.startsWith('http')
-      ? user.avatarUrl
-      : `${serverUrl}${user.avatarUrl}`
-    : null;
+  const resolvedAvatarUrl = resolveAvatarUrl(user?.avatarUrl);
 
   const {
     register,
@@ -55,10 +52,6 @@ export default function ProfilePage() {
     formState: { errors, isDirty },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: user?.name || '',
-      avatarUrl: user?.avatarUrl?.startsWith('http') ? user.avatarUrl : '',
-    },
     values: {
       name: user?.name || '',
       avatarUrl: user?.avatarUrl?.startsWith('http') ? user.avatarUrl : '',
