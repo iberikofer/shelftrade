@@ -142,14 +142,30 @@ export default function LoginPage() {
               {...register('email')}
             />
 
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              leftIcon={<Key className="w-4 h-4" />}
-              error={errors.password?.message}
-              {...register('password')}
-            />
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="login-password"
+                  className="text-xs font-medium text-foreground tracking-wide"
+                >
+                  Password
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-primary hover:underline font-medium"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
+                id="login-password"
+                type="password"
+                placeholder="••••••••"
+                leftIcon={<Key className="w-4 h-4" />}
+                error={errors.password?.message}
+                {...register('password')}
+              />
+            </div>
 
             <Button
               type="submit"

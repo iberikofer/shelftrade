@@ -2,7 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import prisma from '../prisma';
 import { AppError } from '../utils/errors';
-import { sendExchangeNotificationEmail } from '../config/mailer';
+import {
+  sendExchangeNotificationEmail,
+  sendExchangeAcceptedEmail,
+} from '../config/mailer';
 
 export const requestExchange = async (
   req: Request,
@@ -181,6 +184,13 @@ export const updateRequestStatus = async (
       where: { id },
       include: {
         toBook: true,
+        fromUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -197,6 +207,19 @@ export const updateRequestStatus = async (
       where: { id },
       data: { status },
     });
+
+    // Notify requester via email when trade request is approved
+    if (status === 'ACCEPTED') {
+      sendExchangeAcceptedEmail({
+        toEmail: request.fromUser.email,
+        requesterName: request.fromUser.name,
+        ownerName: req.user.name,
+        ownerEmail: req.user.email,
+        bookTitle: request.toBook.title,
+      }).catch(err => {
+        console.warn('[Exchange] Accepted email failed to dispatch:', err);
+      });
+    }
 
     res.json({
       message: `Exchange request ${status.toLowerCase()} successfully`,

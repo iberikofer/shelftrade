@@ -86,12 +86,17 @@ export const updateMyProfile = async (
 
     const data = updateProfileSchema.parse(req.body);
 
+    let avatarUrl = data.avatarUrl;
+    if (req.file) {
+      avatarUrl = `/uploads/${req.file.filename}`;
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: req.user.id },
       data: {
         ...(data.name && { name: data.name.trim() }),
-        ...(data.avatarUrl !== undefined && {
-          avatarUrl: data.avatarUrl || null,
+        ...(avatarUrl !== undefined && {
+          avatarUrl: avatarUrl || null,
         }),
       },
       select: {
@@ -100,12 +105,23 @@ export const updateMyProfile = async (
         email: true,
         role: true,
         avatarUrl: true,
+        createdAt: true,
+        _count: {
+          select: {
+            books: true,
+            requestsSent: true,
+          },
+        },
       },
     });
 
     res.json({
       message: 'Profile updated successfully',
-      user: updatedUser,
+      user: {
+        ...updatedUser,
+        bookCount: updatedUser._count.books,
+        requestsCount: updatedUser._count.requestsSent,
+      },
     });
   } catch (err) {
     next(err);

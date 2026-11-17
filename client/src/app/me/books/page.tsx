@@ -16,7 +16,6 @@ import {
   Mail,
   Check,
   X,
-  Book as BookIcon,
 } from 'lucide-react';
 import { useMyBooks, useAddBook, useDeleteBook } from '../../../hooks/useMyBooks';
 import {

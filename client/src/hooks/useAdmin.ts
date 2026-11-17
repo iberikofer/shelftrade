@@ -107,6 +107,7 @@ export function useAdminDeleteBook() {
       toast.success('Book removed by admin moderation.');
       queryClient.invalidateQueries({ queryKey: ['books'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
     },
     onError: (error: unknown) => {
       const message = axios.isAxiosError(error)

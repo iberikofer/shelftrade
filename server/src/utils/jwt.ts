@@ -15,3 +15,23 @@ export const signToken = (
 export const verifyToken = (token: string): JwtUserPayload => {
   return jwt.verify(token, JWT_SECRET) as JwtUserPayload;
 };
+
+export const signPasswordResetToken = (userId: string, email: string): string => {
+  return jwt.sign({ id: userId, email, purpose: 'reset-password' }, JWT_SECRET, {
+    expiresIn: '1h',
+  });
+};
+
+export const verifyPasswordResetToken = (
+  token: string,
+): { id: string; email: string; purpose: string } => {
+  const payload = jwt.verify(token, JWT_SECRET) as {
+    id: string;
+    email: string;
+    purpose: string;
+  };
+  if (payload.purpose !== 'reset-password') {
+    throw new Error('Invalid token purpose');
+  }
+  return payload;
+};

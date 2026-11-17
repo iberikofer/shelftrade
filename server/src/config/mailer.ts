@@ -157,3 +157,153 @@ export async function sendExchangeNotificationEmail(options: SendExchangeEmailOp
     };
   }
 }
+
+export interface SendPasswordResetEmailOptions {
+  toEmail: string;
+  name: string;
+  resetUrl: string;
+}
+
+export async function sendPasswordResetEmail(options: SendPasswordResetEmailOptions) {
+  const from =
+    process.env.SMTP_FROM || '"ShelfTrade Community" <noreply@shelftrade.local>';
+
+  const htmlContent = `
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #F5F0D0; color: #1A1A1A; border: 1px solid rgba(26,26,26,0.1); border-radius: 6px;">
+      <h2 style="color: #8B2020; margin-top: 0;">🔐 Password Reset Request</h2>
+      <p>Hello <strong>${options.name}</strong>,</p>
+      <p>
+        We received a request to reset your password for your ShelfTrade reader account.
+        Click the link below to choose a new password:
+      </p>
+      <div style="margin: 24px 0; text-align: center;">
+        <a href="${options.resetUrl}" style="background-color: #8B2020; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Reset My Password</a>
+      </div>
+      <p style="font-size: 13px; color: #8A7F6A;">This reset link will expire in 1 hour. If you did not request a password reset, you can safely ignore this email.</p>
+      <hr style="border: none; border-top: 1px solid rgba(26,26,26,0.1); margin: 24px 0;" />
+      <p style="font-size: 12px; color: #8A7F6A;">Sent with care by ShelfTrade — Peer-to-Peer Book Exchange.</p>
+    </div>
+  `;
+
+  try {
+    const mailer = await getTransporter();
+    const info = await mailer.sendMail({
+      from,
+      to: options.toEmail,
+      subject: `[ShelfTrade] Password Reset Link`,
+      html: htmlContent,
+    });
+    return { messageId: info.messageId };
+  } catch (_err) {
+    console.log('────────────────────────────────────────────────────────────');
+    console.log('[ShelfTrade Outgoing Password Reset Email]');
+    console.log(`To: ${options.toEmail} (${options.name})`);
+    console.log(`Reset URL: ${options.resetUrl}`);
+    console.log('────────────────────────────────────────────────────────────');
+    return { messageId: `local-reset-${Date.now()}` };
+  }
+}
+
+export interface SendWelcomeEmailOptions {
+  toEmail: string;
+  name: string;
+}
+
+export async function sendWelcomeEmail(options: SendWelcomeEmailOptions) {
+  const from =
+    process.env.SMTP_FROM || '"ShelfTrade Community" <noreply@shelftrade.local>';
+
+  const htmlContent = `
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #F5F0D0; color: #1A1A1A; border: 1px solid rgba(26,26,26,0.1); border-radius: 6px;">
+      <h2 style="color: #8B2020; margin-top: 0;">📖 Welcome to ShelfTrade!</h2>
+      <p>Hello <strong>${options.name}</strong>,</p>
+      <p>
+        Thank you for joining our community of readers and book collectors.
+        Your reader account is now active!
+      </p>
+      <div style="padding: 14px 18px; background-color: #FFFFFF; border-left: 4px solid #3D5C2A; margin: 16px 0; border-radius: 4px;">
+        <h4 style="margin: 0 0 6px 0; color: #1A1A1A;">Next steps to start trading:</h4>
+        <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #555;">
+          <li>Add books you have read and wish to swap to your personal shelf.</li>
+          <li>Discover books from other readers and send trade proposals with 1 click.</li>
+          <li>Coordinate exchange deliveries or in-person swaps directly with fellow members.</li>
+        </ul>
+      </div>
+      <hr style="border: none; border-top: 1px solid rgba(26,26,26,0.1); margin: 24px 0;" />
+      <p style="font-size: 12px; color: #8A7F6A;">Happy reading &amp; exchanging! — The ShelfTrade Team</p>
+    </div>
+  `;
+
+  try {
+    const mailer = await getTransporter();
+    const info = await mailer.sendMail({
+      from,
+      to: options.toEmail,
+      subject: `[ShelfTrade] Welcome to the Community, ${options.name}!`,
+      html: htmlContent,
+    });
+    return { messageId: info.messageId };
+  } catch (_err) {
+    console.log('────────────────────────────────────────────────────────────');
+    console.log('[ShelfTrade Outgoing Welcome Email]');
+    console.log(`To: ${options.toEmail} (${options.name})`);
+    console.log(`Subject: Welcome to ShelfTrade!`);
+    console.log('────────────────────────────────────────────────────────────');
+    return { messageId: `local-welcome-${Date.now()}` };
+  }
+}
+
+export interface SendExchangeAcceptedEmailOptions {
+  toEmail: string;
+  requesterName: string;
+  ownerName: string;
+  ownerEmail: string;
+  bookTitle: string;
+}
+
+export async function sendExchangeAcceptedEmail(
+  options: SendExchangeAcceptedEmailOptions,
+) {
+  const from =
+    process.env.SMTP_FROM || '"ShelfTrade Community" <noreply@shelftrade.local>';
+
+  const htmlContent = `
+    <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 24px; background-color: #F5F0D0; color: #1A1A1A; border: 1px solid rgba(26,26,26,0.1); border-radius: 6px;">
+      <h2 style="color: #3D5C2A; margin-top: 0;">🎉 Trade Request Accepted!</h2>
+      <p>Hello <strong>${options.requesterName}</strong>,</p>
+      <p>
+        Great news! <strong>${options.ownerName}</strong> has accepted your exchange proposal for:
+      </p>
+      <div style="padding: 12px 16px; background-color: #FFFFFF; border-left: 4px solid #3D5C2A; margin: 16px 0; border-radius: 4px;">
+        <h3 style="margin: 0; color: #1A1A1A;">📖 ${options.bookTitle}</h3>
+      </div>
+      <p>
+        You can now coordinate the exchange details (meeting point or postal delivery) directly with the owner by emailing:
+      </p>
+      <p style="font-size: 16px; margin: 16px 0;">
+        <a href="mailto:${options.ownerEmail}" style="color: #8B2020; font-weight: bold; text-decoration: underline;">${options.ownerEmail}</a>
+      </p>
+      <hr style="border: none; border-top: 1px solid rgba(26,26,26,0.1); margin: 24px 0;" />
+      <p style="font-size: 12px; color: #8A7F6A;">ShelfTrade — Peer-to-Peer Book Exchange.</p>
+    </div>
+  `;
+
+  try {
+    const mailer = await getTransporter();
+    const info = await mailer.sendMail({
+      from,
+      to: options.toEmail,
+      subject: `[ShelfTrade] Trade Accepted for "${options.bookTitle}"!`,
+      html: htmlContent,
+    });
+    return { messageId: info.messageId };
+  } catch (_err) {
+    console.log('────────────────────────────────────────────────────────────');
+    console.log('[ShelfTrade Outgoing Trade Accepted Email]');
+    console.log(`To: ${options.toEmail} (Requester: ${options.requesterName})`);
+    console.log(`Owner: ${options.ownerName} <${options.ownerEmail}>`);
+    console.log(`Book: "${options.bookTitle}"`);
+    console.log('────────────────────────────────────────────────────────────');
+    return { messageId: `local-accepted-${Date.now()}` };
+  }
+}

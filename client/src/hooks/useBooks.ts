@@ -21,6 +21,7 @@ interface UseBooksParams {
   sort?: string;
   page?: number;
   limit?: number;
+  userId?: string;
 }
 
 export function useBooks({
@@ -28,15 +29,17 @@ export function useBooks({
   sort = 'asc',
   page = 1,
   limit = 8,
-}: UseBooksParams) {
+  userId,
+}: UseBooksParams = {}) {
   return useQuery<BooksResponse>({
-    queryKey: ['books', { search, sort, page, limit }],
+    queryKey: ['books', { search, sort, page, limit, userId }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (search.trim()) params.set('search', search.trim());
       if (sort) params.set('sort', sort);
       if (page) params.set('page', page.toString());
       if (limit) params.set('limit', limit.toString());
+      if (userId) params.set('userId', userId);
 
       const res = await api.get(`/books?${params.toString()}`);
       return res.data;

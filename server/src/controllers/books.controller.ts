@@ -16,13 +16,17 @@ export const getBooks = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { search, sort = 'asc', page = '1', limit = '8' } = req.query;
+    const { search, sort = 'asc', page = '1', limit = '8', userId } = req.query;
 
     const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit as string, 10) || 8));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 8));
     const skip = (pageNum - 1) * limitNum;
 
     const where: Prisma.BookWhereInput = {};
+
+    if (userId && typeof userId === 'string' && userId.trim() !== '') {
+      where.ownerId = userId.trim();
+    }
 
     if (search && typeof search === 'string' && search.trim() !== '') {
       const term = search.trim();

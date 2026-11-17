@@ -32,7 +32,7 @@ export default function BookGrid({
 
   if (books.length === 0) {
     return (
-      <div className="w-full bg-card border border-card-border rounded-lg p-12 flex flex-col items-center justify-center text-center">
+      <div className="w-full bg-card border border-card-border rounded-sm p-12 flex flex-col items-center justify-center text-center">
         <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-3">
           <BookX className="w-6 h-6" />
         </div>

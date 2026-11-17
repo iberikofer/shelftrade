@@ -317,8 +317,11 @@ export function useRandomQuote(defaultId: number = 1) {
   const [quote, setQuote] = useState<LiteraryQuote>(fallback);
 
   useEffect(() => {
-    const freshQuote = getRandomLiteraryQuote();
-    setQuote(freshQuote);
+    const handle = requestAnimationFrame(() => {
+      const freshQuote = getRandomLiteraryQuote();
+      setQuote(freshQuote);
+    });
+    return () => cancelAnimationFrame(handle);
   }, []);
 
   return quote;

@@ -18,6 +18,7 @@ export interface User {
   avatarUrl?: string | null;
   bookCount?: number;
   requestsCount?: number;
+  createdAt?: string;
 }
 
 interface AuthContextType {
@@ -75,19 +76,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedToken = localStorage.getItem('shelftrade_token');
-      const storedUser = localStorage.getItem('shelftrade_user');
+      try {
+        const storedToken = localStorage.getItem('shelftrade_token');
+        const storedUser = localStorage.getItem('shelftrade_user');
 
-      if (storedToken && storedUser) {
-        try {
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
-        } catch {
-          localStorage.removeItem('shelftrade_user');
+        if (storedToken && storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser);
+            setToken(storedToken);
+            setUser(parsedUser);
+          } catch {
+            localStorage.removeItem('shelftrade_user');
+          }
         }
+      } finally {
+        // Immediately end loading so UI renders cached user credentials with 0ms delay
+        setIsLoading(false);
       }
 
-      await refreshUser();
+      // Background re-validation against the server
+      const token = localStorage.getItem('shelftrade_token');
+      if (token) {
+        try {
+          const res = await api.get('/auth/me');
+          if (res.data?.user) {
+            setUser(res.data.user);
+            localStorage.setItem('shelftrade_user', JSON.stringify(res.data.user));
+          }
+        } catch {
+          logout();
+        }
+      }
     };
 
     initializeAuth();
@@ -101,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener('auth:unauthorized', handleUnauthorized);
     };
-  }, [logout, refreshUser]);
+  }, [logout]);
 
   return (
     <AuthContext.Provider

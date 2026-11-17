@@ -11,6 +11,6 @@ router.use(requireAuth);
 router.get('/books', getMyBooks);
 router.post('/books', upload.single('photo'), createBook);
 router.delete('/books/:id', deleteMyBook);
-router.patch('/profile', updateMyProfile);
+router.patch('/profile', upload.single('avatar'), updateMyProfile);
 
 export default router;

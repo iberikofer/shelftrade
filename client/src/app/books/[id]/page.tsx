@@ -12,7 +12,6 @@ import Spinner from '../../../components/ui/Spinner';
 import BookCover from '../../../components/books/BookCover';
 import {
   ArrowLeft,
-  Book as BookIcon,
   Send,
   User as UserIcon,
   Mail,
@@ -61,7 +60,7 @@ export default function BookDetailsPage({ params }: BookDetailsPageProps) {
 
   if (error || !book) {
     return (
-      <div className="max-w-lg mx-auto bg-card border border-card-border rounded-lg p-10 text-center">
+      <div className="max-w-lg mx-auto bg-card border border-card-border rounded-sm p-10 text-center">
         <h2 className="font-serif text-xl font-bold text-foreground">Book Not Found</h2>
         <p className="text-sm text-muted mt-2">
           This book may have been removed by its owner or the link is invalid.
